@@ -61,9 +61,6 @@ public class Starfish {
     while (!Evaluation.isGameOver(b, whiteTurn)) {
       if (whiteTurn) {
         System.out.print("\nWhite's turn: ");
-        if (Moves.isInCheck(b.board, whiteTurn)) {
-          System.out.println("\n\tDEBUG: White king seems to be in check!");
-        }
         /* CASTLING STUFF
         if (Moves.possibleCastle(b, whiteTurn).length() > 0) {
           System.out.println("Possible castling options: " + Moves.possibleCastle(b, whiteTurn));
@@ -101,9 +98,6 @@ public class Starfish {
         moveHistory.add(Moves.algebraToMove(userMove));
       } else {
         System.out.print("\nStarfish's turn: ");
-        if (Moves.isInCheck(b.board, whiteTurn)) {
-          System.out.println("\n\tDEBUG: Black king seems to be in check!");
-        }
         // IDEA: Perhaps add a feature where Starfish could decide to resign if static eval < SOME_NUMBER?
         long startTime = System.nanoTime();
         computerMove = Evaluation.getBestMove(b, 4, -Constants.INF, Constants.INF, false);
