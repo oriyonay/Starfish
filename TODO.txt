@@ -1,0 +1,7 @@
+TODO:
+
+ - Implement more efficient way of eliminating illegal moves (padded safety board?)
+ - Write Board constructor that imports FEN
+ - Write method that exports current board position as FEN
+ - Implement castling
+ - Implement en passant (future)
