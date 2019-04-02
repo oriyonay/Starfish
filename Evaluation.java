@@ -221,8 +221,8 @@ static int king_end_game[] =
   public static String getBestMove(Board currPos, int depth, int alpha, int beta, boolean isWhite) {
     positionCounter = 0; // reset position counter
     alphaBeta(currPos, depth, alpha, beta, isWhite);
-    System.out.println(Moves.moveToAlgebra(bestMove));
-    System.out.println("Positions analyzed: " + positionCounter);
+    System.out.print(Moves.moveToAlgebra(bestMove));
+    System.out.println("\nPositions analyzed: " + positionCounter);
     return bestMove;
   }
   public static int alphaBeta(Board currPos, int depth, int alpha, int beta, boolean isWhite) {

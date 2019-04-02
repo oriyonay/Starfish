@@ -180,10 +180,6 @@ public class Moves {
     return moves;
   }
   public static String eliminateIllegalMoves(Board b, String moves, boolean isWhite) {
-    // TEMPORARY METHOD! THIS DOES NOT WORK
-    return moves;
-  }
-  public static String eliminateIllegalMoves1(Board b, String moves, boolean isWhite) {
     // eliminate illegal moves (a.k.a moves that result in current player being in check)
     String eliminated = "";
     for (int i = 0; i < moves.length(); i+= 5) {
@@ -647,6 +643,156 @@ public class Moves {
     return moves;
   }
   public static boolean isInCheck(char[][] board, boolean white) {
+    // New, much more efficient method:
+    // find the king:
+    int kingLocI = 2, kingLocJ = 2; // 0, 0 in padded board notation
+    if (white) {
+      for (int i = 2; i < 10; i++) {
+        for (int j = 2; j < 10; j++) {
+          if (board[i][j] == 'K') {
+            kingLocI = i;
+            kingLocJ = j;
+            break;
+          }
+        }
+      }
+      // Find possible pawn checks:
+      if (board[kingLocI-1][kingLocJ+1] == 'p' || board[kingLocI-1][kingLocJ-1] == 'p') return true;
+      // Find possible knight checks:
+      if (board[kingLocI-2][kingLocJ+1] == 'n') return true;
+      if (board[kingLocI-1][kingLocJ+2] == 'n') return true;
+      if (board[kingLocI+1][kingLocJ+2] == 'n') return true;
+      if (board[kingLocI+2][kingLocJ+1] == 'n') return true;
+      if (board[kingLocI+2][kingLocJ-1] == 'n') return true;
+      if (board[kingLocI+1][kingLocJ-2] == 'n') return true;
+      if (board[kingLocI-1][kingLocJ-2] == 'n') return true;
+      if (board[kingLocI-2][kingLocJ-1] == 'n') return true;
+      // Find possible bishop / queen (diagonal) checks:
+      for (int a = 1; a < 8; a++) {
+        if (kingLocI - a >= 2 && kingLocJ + a < 10) {
+          if (board[kingLocI-a][kingLocJ+a] == ' ') continue;
+          if (Character.isUpperCase(board[kingLocI-a][kingLocJ+a])) break;
+          else if (board[kingLocI-a][kingLocJ+a] == 'b' || board[kingLocI-a][kingLocJ+a] == 'q') return true;
+        }
+      }
+      for (int a = 1; a < 8; a++) {
+        if (kingLocI - a >= 2 && kingLocJ - a >= 2) {
+          if (board[kingLocI-a][kingLocI-a] == ' ') continue;
+          if (Character.isUpperCase(board[kingLocI-a][kingLocJ-a])) break;
+          else if (board[kingLocI-a][kingLocI-a] == 'b' || board[kingLocI-a][kingLocJ-a] == 'q') return true;
+        }
+      }
+      for (int a = 1; a < 8; a++) {
+        if (kingLocI + a < 10 && kingLocJ - a >= 2) {
+          if (board[kingLocI+a][kingLocJ-a] == ' ') continue;
+          if (Character.isUpperCase(board[kingLocI+a][kingLocJ-a])) break;
+          else if (board[kingLocI+a][kingLocJ-a] == 'b' || board[kingLocI+a][kingLocJ-a] == 'q') return true;
+        }
+      }
+      for (int a = 1; a < 8; a++) {
+        if (kingLocI + a < 10 && kingLocJ + a < 10) {
+          if (board[kingLocI+a][kingLocI+a] == ' ') continue;
+          if (Character.isUpperCase(board[kingLocI+a][kingLocJ+a])) break;
+          else if (board[kingLocI+a][kingLocJ+a] == 'b' || board[kingLocI+a][kingLocJ+a] == 'q') return true;
+        }
+      }
+      // Find possible rook / queen (straight) checks:
+      for (int a = kingLocI+1; a < 10; a++) {
+        if (board[a][kingLocJ] == ' ') continue;
+        if (Character.isUpperCase(board[a][kingLocJ])) break;
+        else if (board[a][kingLocJ] == 'r' || board[a][kingLocJ] == 'q') return true;
+      }
+      for (int a = kingLocI-1; a >= 2; a--) {
+        if (board[a][kingLocJ] == ' ') continue;
+        if (Character.isUpperCase(board[a][kingLocJ])) break;
+        else if (board[a][kingLocJ] == 'r' || board[a][kingLocJ] == 'q') return true;
+      }
+      for (int a = kingLocJ+1; a < 10; a++) {
+        if (board[kingLocI][a] == ' ') continue;
+        if (Character.isUpperCase(board[kingLocI][a])) break;
+        else if (board[kingLocI][a] == 'r' || board[kingLocI][a] == 'q') return true;
+      }
+      for (int a = kingLocJ-1; a >= 2; a--) {
+        if (board[kingLocI][a] == ' ') continue;
+        if (Character.isUpperCase(board[kingLocI][a])) break;
+        else if (board[kingLocI][a] == 'r' || board[kingLocI][a] == 'q') return true;
+      }
+      // possible BUG: kings would be allowed to touch? maybe we need to add another part to this to avoid that?
+    } else {
+      for (int i = 2; i < 10; i++) {
+        for (int j = 2; j < 10; j++) {
+          if (board[i][j] == 'k') {
+            kingLocI = i;
+            kingLocJ = j;
+            break;
+          }
+        }
+      }
+      // Find possible pawn checks:
+      if (board[kingLocI+1][kingLocJ+1] == 'P' || board[kingLocI+1][kingLocJ-1] == 'P') return true;
+      // Find possible knight checks:
+      if (board[kingLocI-2][kingLocJ+1] == 'N') return true;
+      if (board[kingLocI-1][kingLocJ+2] == 'N') return true;
+      if (board[kingLocI+1][kingLocJ+2] == 'N') return true;
+      if (board[kingLocI+2][kingLocJ+1] == 'N') return true;
+      if (board[kingLocI+2][kingLocJ-1] == 'N') return true;
+      if (board[kingLocI+1][kingLocJ-2] == 'N') return true;
+      if (board[kingLocI-1][kingLocJ-2] == 'N') return true;
+      if (board[kingLocI-2][kingLocJ-1] == 'N') return true;
+      // Find possible bishop / queen (diagonal) checks:
+      for (int a = 1; a < 8; a++) {
+        if (kingLocI + a < 10 && kingLocJ - a >= 2) {
+          if (board[kingLocI+a][kingLocJ-a] == ' ') continue;
+          if (Character.isLowerCase(board[kingLocI+a][kingLocJ-a])) break;
+          else if (board[kingLocI+a][kingLocJ-a] == 'B' || board[kingLocI+a][kingLocJ-a] == 'Q') return true;
+        }
+      }
+      for (int a = 1; a < 8; a++) {
+        if (kingLocI + a < 10 && kingLocJ + a < 10) {
+          if (board[kingLocI+a][kingLocI+a] == ' ') continue;
+          if (Character.isLowerCase(board[kingLocI+a][kingLocJ+a])) break;
+          else if (board[kingLocI+a][kingLocI+a] == 'B' || board[kingLocI+a][kingLocJ+a] == 'Q') return true;
+        }
+      }
+      for (int a = 1; a < 8; a++) {
+        if (kingLocI - a >= 2 && kingLocJ + a < 10) {
+          if (board[kingLocI-a][kingLocJ+a] == ' ') continue;
+          if (Character.isLowerCase(board[kingLocI-a][kingLocJ+a])) break;
+          else if (board[kingLocI-a][kingLocJ+a] == 'B' || board[kingLocI-a][kingLocJ+a] == 'Q') return true;
+        }
+      }
+      for (int a = 1; a < 8; a++) {
+        if (kingLocI - a >= 2 && kingLocJ - a >= 2) {
+          if (board[kingLocI-a][kingLocI-a] == ' ') continue;
+          if (Character.isLowerCase(board[kingLocI-a][kingLocJ-a])) break;
+          else if (board[kingLocI-a][kingLocJ-a] == 'B' || board[kingLocI-a][kingLocJ-a] == 'Q') return true;
+        }
+      }
+      // Find possible rook / queen (straight) checks:
+      for (int a = kingLocI+1; a < 10; a++) {
+        if (board[a][kingLocJ] == ' ') continue;
+        if (Character.isLowerCase(board[a][kingLocJ])) break;
+        else if (board[a][kingLocJ] == 'R' || board[a][kingLocJ] == 'Q') return true;
+      }
+      for (int a = kingLocI-1; a >= 2; a--) {
+        if (board[a][kingLocJ] == ' ') continue;
+        if (Character.isLowerCase(board[a][kingLocJ])) break;
+        else if (board[a][kingLocJ] == 'R' || board[a][kingLocJ] == 'Q') return true;
+      }
+      for (int a = kingLocJ+1; a < 10; a++) {
+        if (board[kingLocI][a] == ' ') continue;
+        if (Character.isLowerCase(board[kingLocI][a])) break;
+        else if (board[kingLocI][a] == 'R' || board[kingLocI][a] == 'Q') return true;
+      }
+      for (int a = kingLocJ-1; a >= 2; a--) {
+        if (board[kingLocI][a] == ' ') continue;
+        if (Character.isLowerCase(board[kingLocI][a])) break;
+        else if (board[kingLocI][a] == 'R' || board[kingLocI][a] == 'Q') return true;
+      }
+    }
+    return false;
+  }
+  /*public static boolean isInCheck(char[][] board, boolean white) {
     // find the king:
     String kingLoc = "22"; // 0, 0 in padded board notation
     if (white) {
@@ -678,7 +824,7 @@ public class Moves {
       }
       return false;
     }
-  }
+  }*/
   public static boolean isAvailableForWhite(char x) {
     // helper function to determine wether white can move onto 'x':
     return (Character.isLowerCase(x) || x == ' ');

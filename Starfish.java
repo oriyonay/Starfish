@@ -60,7 +60,10 @@ public class Starfish {
     ArrayList<String> moveHistory = new ArrayList<String>();
     while (!Evaluation.isGameOver(b, whiteTurn)) {
       if (whiteTurn) {
-        System.out.println("White's turn: ");
+        System.out.print("\nWhite's turn: ");
+        if (Moves.isInCheck(b.board, whiteTurn)) {
+          System.out.println("\n\tDEBUG: White king seems to be in check!");
+        }
         /* CASTLING STUFF
         if (Moves.possibleCastle(b, whiteTurn).length() > 0) {
           System.out.println("Possible castling options: " + Moves.possibleCastle(b, whiteTurn));
@@ -97,14 +100,18 @@ public class Starfish {
         // for undoing moves, we keep track of the moves made
         moveHistory.add(Moves.algebraToMove(userMove));
       } else {
-        System.out.println("Starfish's turn: ");
+        System.out.print("\nStarfish's turn: ");
+        if (Moves.isInCheck(b.board, whiteTurn)) {
+          System.out.println("\n\tDEBUG: Black king seems to be in check!");
+        }
+        // IDEA: Perhaps add a feature where Starfish could decide to resign if static eval < SOME_NUMBER?
         long startTime = System.nanoTime();
         computerMove = Evaluation.getBestMove(b, 4, -Constants.INF, Constants.INF, false);
         Moves.makeMove(b, computerMove, whiteTurn);
         // add Starfish's move to the move history
         moveHistory.add(computerMove);
         long endTime = System.nanoTime();
-        System.out.println("Calculation took " + (endTime - startTime)/1000000 + "ms");
+        System.out.println("Calculation took " + (endTime - startTime)/1000000 + "ms\n");
       }
       whiteTurn = !whiteTurn;
       b.printBoard();
