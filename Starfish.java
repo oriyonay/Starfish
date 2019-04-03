@@ -96,6 +96,7 @@ public class Starfish {
         }
         // for undoing moves, we keep track of the moves made
         moveHistory.add(Moves.algebraToMove(userMove));
+        //b.printBoardBlack();
       } else {
         System.out.print("\nStarfish's turn: ");
         // IDEA: Perhaps add a feature where Starfish could decide to resign if static eval < SOME_NUMBER?
@@ -106,6 +107,7 @@ public class Starfish {
         moveHistory.add(computerMove);
         long endTime = System.nanoTime();
         System.out.println("Calculation took " + (endTime - startTime)/1000000 + "ms\n");
+        //b.printBoard();
       }
       whiteTurn = !whiteTurn;
       b.printBoard();

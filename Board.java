@@ -85,6 +85,16 @@ public class Board {
     }
     System.out.print(System.lineSeparator());
   }
+  public static void printBoardBlack() {
+    // prints itself from Black's perspective
+    for (int i = 9; i > 1; i--) { // 2 3 4 5 6 7 8 9 --> 9 8 7 6 5 4 3 2
+      for (int j = 9; j > 1; j--) {
+        System.out.print(board[i][j] + "|");
+      }
+      System.out.print(System.lineSeparator());
+    }
+    System.out.print(System.lineSeparator());
+  }
   public static void printSafetyBoard(boolean[][] safety) {
     for (int i = 0; i < 12; i++) {
       for (int j = 0; j < 12; j++) {
