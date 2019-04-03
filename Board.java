@@ -19,6 +19,7 @@ public class Board {
     // TO BE IMPLEMENTED
     // for FEN importing:
     board = new char[12][12];
+    CWK = false; CWQ = false; CBK = false; CBQ = false;
     // Set up the blank board:
     for (int i = 0; i < board.length; i++) {
       for (int j = 0; j < board[0].length; j++) {
@@ -28,6 +29,10 @@ public class Board {
     }
     String[] fenSplit = FEN.split(" ");
     String[] lineSplit = fenSplit[0].split("/");
+    if (lineSplit.length < 8) {
+      System.out.println("Error: Invalid FEN string");
+      board = getStandardBoard();
+    }
     char c;
     for (int i = 2; i < board.length - 2; i++) {
       int strIterator = 0;
@@ -62,6 +67,35 @@ public class Board {
       {'-', '-', 'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R', '-', '-'},
       {'-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'},
       {'-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'}};
+  }
+  public static String getFEN() {
+    String FEN = "";
+    int numSpaces = 0;
+    char c;
+    for (int i = 2; i < 10; i++) {
+      for (int j = 2; j < 10; j++) {
+        c = board[i][j]; // not needed, but is here for simplicity of code
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) { // if c is alphabetic
+          FEN+= c;
+          continue;
+        }
+        while (c == ' ') {
+          j++;
+          numSpaces++;
+          c = board[i][j];
+        }
+        FEN+= numSpaces;
+        numSpaces = 0;
+        j--;
+      }
+      FEN+= "/";
+    }
+    FEN+= whiteTurn ? " w " : " b ";
+    if (CWK) FEN+= "K";
+    if (CWQ) FEN+= "Q";
+    if (CBK) FEN+= "k";
+    if (CBQ) FEN+= "q";
+    return FEN;
   }
   public static char[][] getSunilBoard() {
     return new char[][] {

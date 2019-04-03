@@ -98,6 +98,11 @@ public class Starfish {
           } catch (Exception e) {} // do nothing
           continue;
         }
+        if (userMove.startsWith("export")) {
+          System.out.println("Current board FEN: " + b.getFEN());
+          if (userMove.startsWith("export!")) return;
+          continue;
+        }
         while (!Moves.makeMove(b, Moves.algebraToMove(userMove), whiteTurn)) {
           userMove = in.nextLine();
         }

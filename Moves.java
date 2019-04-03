@@ -26,8 +26,7 @@ public class Moves {
     if (!valid) {
       System.out.println("Error: illegal move! " + moveToAlgebra(move));
       b.printBoard();
-      System.out.println("White to move: " + whiteToPlay);
-      System.out.println();
+      System.out.println("White's turn: ");
       return false;
     }
     makeMoveVerified(b, move);

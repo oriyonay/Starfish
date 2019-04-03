@@ -232,14 +232,12 @@ static int king_end_game[] =
     }
     String moves = Moves.availableMoves(currPos, isWhite);
     int bestMoveIndex = -1;
-    Board tempBoard = new Board(currPos.board);
     if (isWhite) { // maximizing player
       int value = -Constants.INF;
       for (int i = 0; i < moves.length(); i+=5) {
-        Moves.makeMove(tempBoard, moves.substring(i, i+5), true);
-        int ab = alphaBeta(new Board(tempBoard.board), depth-1, alpha, beta, false);
-        Moves.undoMove(tempBoard, moves.substring(i, i+5));
-        //tempBoard.printBoard();
+        Moves.makeMove(currPos, moves.substring(i, i+5), true);
+        int ab = alphaBeta(new Board(currPos.board), depth-1, alpha, beta, false);
+        Moves.undoMove(currPos, moves.substring(i, i+5));
         if (ab > value) {
           value = ab;
           bestMoveIndex = i;
@@ -251,10 +249,9 @@ static int king_end_game[] =
     } else {
       int value = Constants.INF;
       for (int i = 0; i < moves.length(); i+=5) {
-        Moves.makeMove(tempBoard, moves.substring(i, i+5), false);
-        int ab = alphaBeta(new Board(tempBoard.board), depth-1, alpha, beta, true);
-        Moves.undoMove(tempBoard, moves.substring(i, i+5));
-        //tempBoard.printBoard();
+        Moves.makeMove(currPos, moves.substring(i, i+5), false);
+        int ab = alphaBeta(new Board(currPos.board), depth-1, alpha, beta, true);
+        Moves.undoMove(currPos, moves.substring(i, i+5));
         if (ab < value) {
           value = ab;
           bestMoveIndex = i;
