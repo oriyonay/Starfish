@@ -7,6 +7,7 @@ public class Moves {
     return moveString;
   }
   public static String algebraToMove(String algebra) {
+    algebra = algebra.toUpperCase();
     String moveString = (58 - algebra.charAt(1)) + "" + (algebra.charAt(0) -  63);
     moveString+= (58 - algebra.charAt(3)) + "" + (algebra.charAt(2) -  63);
     return moveString;

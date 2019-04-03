@@ -2,8 +2,11 @@ package starfish;
 
 public class Board {
   public static char[][] board;
+  public static boolean whiteTurn = true; // we assume white goes first, even if FEN is imported
   //public static char lastMovePieceRemoved = ' '; // if the most recent move was D2D4, this would be what used to be on D4
   public static String moveHistoryPiecesRemoved = " ";
+  public static boolean[][] whiteSafetyBoard = paddedSafetyBoard();
+  public static boolean[][] blackSafetyBoard = paddedSafetyBoard();
   public static boolean CWK = true, CWQ = true, CBK = true, CBQ = true; // castle rights
   public Board() {
     // standard chess board
@@ -15,13 +18,35 @@ public class Board {
   public Board(String FEN) {
     // TO BE IMPLEMENTED
     // for FEN importing:
-    int charIndex = 0, boardIndex = 0;
-    while (FEN.charAt(charIndex) != ' ') {
-      /*switch(FEN.charAt(charIndex)) {
-        case 'P':
-          break;
-      }*/
+    board = new char[12][12];
+    // Set up the blank board:
+    for (int i = 0; i < board.length; i++) {
+      for (int j = 0; j < board[0].length; j++) {
+        if (i < 2 || i > 9 || j < 2 || j > 9) board[i][j] = '-';
+        else board[i][j] = ' ';
+      }
     }
+    String[] fenSplit = FEN.split(" ");
+    String[] lineSplit = fenSplit[0].split("/");
+    char c;
+    for (int i = 2; i < board.length - 2; i++) {
+      int strIterator = 0;
+      for (int j = 2; j < board[0].length - 2; j++) {
+        c = lineSplit[i-2].charAt(strIterator);
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) board[i][j] = c; // if c is alphabetic
+        else if (Character.isDigit(c) && c != '0') j+= (c - 49); // convert character to int equivalent
+        strIterator++;
+      }
+    }
+    try {
+      if (fenSplit[1].indexOf('b') >= 0) whiteTurn = false;
+      // check castling rights:
+      if (fenSplit[2].indexOf('K') >= 0) CWK = true;
+      if (fenSplit[2].indexOf('Q') >= 0) CWQ = true;
+      if (fenSplit[2].indexOf('k') >= 0) CBK = true;
+      if (fenSplit[2].indexOf('q') >= 0) CBQ = true;
+    } catch (Exception e) {} // do nothing
+    printBoard();
   }
   public static char[][] getStandardBoard() {
     return new char[][] {

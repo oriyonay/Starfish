@@ -28,8 +28,8 @@ public class Starfish {
     System.out.println("To make a move, enter it in algebraic notation.");
     System.out.println("For example: D2D4 will move the piece on D2 to D4");
     System.out.println("Happy playing!\n");
-    boolean whiteTurn = true;
     Board b = new Board();
+    boolean whiteTurn = b.whiteTurn;
     b.printBoard();
     Scanner in = new Scanner(System.in);
     String userMove = "";
@@ -49,9 +49,9 @@ public class Starfish {
     }
   }
   public static void playStarfish() {
-    boolean whiteTurn = true;
     //Board b = new Board(Board.getSunilBoard());
     Board b = new Board();
+    boolean whiteTurn = b.whiteTurn; // could just be set to true, but could be useful later
     b.printBoard();
     Scanner in = new Scanner(System.in);
     String userMove = "";
@@ -89,6 +89,13 @@ public class Starfish {
           Moves.undoMove(b, moveHistory.get(moveHistory.size()-1));
           moveHistory.remove(moveHistory.size()-1);
           b.printBoard();
+          continue;
+        }
+        if (userMove.startsWith("import")) {
+          try {
+            b = new Board(userMove.substring(userMove.indexOf(" ") + 1));
+            whiteTurn = b.whiteTurn;
+          } catch (Exception e) {} // do nothing
           continue;
         }
         while (!Moves.makeMove(b, Moves.algebraToMove(userMove), whiteTurn)) {
