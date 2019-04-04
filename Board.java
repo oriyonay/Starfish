@@ -4,7 +4,6 @@ public class Board {
   public static char[][] board;
   public static boolean whiteTurn = true; // we assume white goes first, even if FEN is imported
   public static String moveHistoryPiecesRemoved = " ";
-  public static String[] castleRightsHistory = {"", "", "", ""}; // 1 for true, 0 for false
   public static boolean CWK = true, CWQ = true, CBK = true, CBQ = true; // castle rights
   public Board() {
     // standard chess board

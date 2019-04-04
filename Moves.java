@@ -29,29 +29,20 @@ public class Moves {
       System.out.println("White's turn: ");
       return false;
     }
+    /*int from = Integer.parseInt(move.substring(0, 2));
+    boolean possiblyCastle = (move == "9698" || move == "9694" || move == "2628" || move == "2624");
+    if (possiblyCastle && Character.toUpperCase(b.board[from/10][from%10]) == 'K') return makeMoveCastle(b, move, whiteToPlay);*/
     makeMoveVerified(b, move);
     return true;
   }
   public static void makeMoveVerified(Board b, String move) {
     // NOTE: This function assumes validity of input!
-    // EXPERIMENTAL: update board's castle rights history:
-    
-
     int from = Integer.parseInt(move.substring(0, 2));
     int to = Integer.parseInt(move.substring(2, 4));
     b.moveHistoryPiecesRemoved += b.board[to/10][to%10];
     b.board[to/10][to%10] = b.board[from/10][from%10];
     b.board[from/10][from%10] = ' ';
     if (move.charAt(4) != ' ') b.board[to/10][to%10] = move.charAt(4);
-  }
-  public static boolean makeMoveActual(Board b, String move, boolean whiteToPlay) {
-    /* Difference between makeMoveVerified and makeMoveActual:
-     * makeMoveActual makes the move AND MODIFIES CASTLING RIGHTS
-     * while makeMoveVerified only makes the move (and is used by alpha-beta)
-     * to evaluate future positions. We do this to prevent alphaBeta from changing
-     * castling rights in future calculated positions (that are not the current position). */
-     // NOT FINISHED
-    return true;
   }
   /*public static boolean makeMoveCastle(Board b, String move, boolean whiteToPlay) {
     // NOTE: We can explicitly define castling here to shave processing time a tiny bit.
@@ -98,12 +89,10 @@ public class Moves {
         return true;
     }
     return false;
-  }*/
+  } */
   public static void undoMove(Board b, String move) {
     // THIS ASSUMES CORRECT INPUT (as the user doesn't touch this function)
     // note: this does not mean perfect input ;)
-    // EXPERIMENTAL: Undo board's castle rights history:
-
     int to = Integer.parseInt(move.substring(0, 2));
     int from = Integer.parseInt(move.substring(2, 4));
     b.board[to/10][to%10] = b.board[from/10][from%10];
@@ -131,13 +120,10 @@ public class Moves {
   public static String availableMovesNC(Board b, boolean isWhite) { // NC = No Check
     return eliminateIllegalMoves(b, availableMovesNCDE(b, isWhite), isWhite);
   }
-  /*public static String availableMovesNCDE(Board b, boolean isWhite) { // NC = No Check, DE = Don't eliminate
-    return possibleCastle(b, isWhite) + availableMovesNCDENC(b, isWhite);
-  } */
   public static String availableMovesNCDE(Board b, boolean isWhite) { // NC = No Check, DE = Don't eliminate, NC = No castle
     // This method assumes the king is NOT in check!
     String moves = "";
-    // NOTE: We could make this more efficient by sorting the moves
+    // NOTE: We could make this more efficient by sorting the moves by probability of success
     if (isWhite) {
       for (int i = 2; i < 10; i++) {
         for (int j = 2; j < 10; j++) {
@@ -217,7 +203,7 @@ public class Moves {
       if (b.CBQ && b.board[2][5] == ' ' && b.board[2][4] == ' ' || b.board[2][3] == ' ') possibleCastle+= "2624 ";
     }
     return possibleCastle;
-  }*/
+  } */
   public static String movesWP(Board b, int i, int j) {
     // moves for the white pawn
     String moves = "";
