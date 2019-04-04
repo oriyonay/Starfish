@@ -163,7 +163,7 @@ static int king_end_game[] =
     // check if checkmate:
     // NOTE: THIS ASSUMES THAT AVAILABLEMOVES WORKS CORRECTLY REGARDING CHECK EVASION
     if (Moves.availableMoves(board, whiteToPlay).length() == 0) {
-      if (Moves.isInCheck(board.board, whiteToPlay)) { // checkmate
+      if (Moves.isInCheck(board.board, whiteToPlay, board.kingLocs)) { // checkmate
         if (whiteToPlay) return -Constants.CHECKMATE_SCORE;
         else return Constants.CHECKMATE_SCORE;
       } else return 0; // draw */
@@ -235,7 +235,7 @@ static int king_end_game[] =
     if (isWhite) { // maximizing player
       int value = -Constants.INF;
       for (int i = 0; i < moves.length(); i+=5) {
-        Moves.makeMove(currPos, moves.substring(i, i+5), true);
+        Moves.makeMoveVerified(currPos, moves.substring(i, i+5));
         int ab = alphaBeta(new Board(currPos.board), depth-1, alpha, beta, false);
         Moves.undoMove(currPos, moves.substring(i, i+5));
         if (ab > value) {
@@ -249,7 +249,7 @@ static int king_end_game[] =
     } else {
       int value = Constants.INF;
       for (int i = 0; i < moves.length(); i+=5) {
-        Moves.makeMove(currPos, moves.substring(i, i+5), false);
+        Moves.makeMoveVerified(currPos, moves.substring(i, i+5));
         int ab = alphaBeta(new Board(currPos.board), depth-1, alpha, beta, true);
         Moves.undoMove(currPos, moves.substring(i, i+5));
         if (ab < value) {
@@ -259,7 +259,9 @@ static int king_end_game[] =
         if (value < beta) beta = value;
         if (alpha >= beta) break; // beta cut-off
       }
-      bestMove = moves.substring(bestMoveIndex, bestMoveIndex+5);
+      try {
+        bestMove = moves.substring(bestMoveIndex, bestMoveIndex+5);
+      } catch (Exception e) {} // TEST WHY THIS HAPPENS?
       //System.out.println("Depth: " + depth + ", bestMoveIndex = " + bestMoveIndex + ", which is " + Moves.moveToAlgebra(moves.substring(bestMoveIndex, bestMoveIndex+5)));
       return value;
     }

@@ -39,6 +39,13 @@ public class Moves {
     // NOTE: This function assumes validity of input!
     int from = Integer.parseInt(move.substring(0, 2));
     int to = Integer.parseInt(move.substring(2, 4));
+    if (b.board[from/10][from%10] == 'K') {
+      b.kingLocs[0] = to/10;
+      b.kingLocs[1] = to%10;
+    } else if (b.board[from/10][from%10] == 'k') {
+      b.kingLocs[2] = to/10;
+      b.kingLocs[3] = to%10;
+    }
     b.moveHistoryPiecesRemoved += b.board[to/10][to%10];
     b.board[to/10][to%10] = b.board[from/10][from%10];
     b.board[from/10][from%10] = ' ';
@@ -100,7 +107,7 @@ public class Moves {
     b.moveHistoryPiecesRemoved = b.moveHistoryPiecesRemoved.substring(0, b.moveHistoryPiecesRemoved.length()-1);
   }
   public static String availableMoves(Board b, boolean isWhite) {
-    if (isInCheck(b.board, isWhite)) return availableMovesIIC(b, isWhite);
+    if (isInCheck(b.board, isWhite, b.kingLocs)) return availableMovesIIC(b, isWhite);
     return availableMovesNC(b, isWhite);
   }
   public static String availableMovesIIC(Board b, boolean isWhite) {
@@ -109,7 +116,7 @@ public class Moves {
     String moves = "";
     for (int i = 0; i < availableMoves.length(); i+= 5) {
       Moves.makeMoveVerified(b, availableMoves.substring(i, i+5));
-      if (!isInCheck(b.board, isWhite)) {
+      if (!isInCheck(b.board, isWhite, b.kingLocs)) {
         moves+= availableMoves.substring(i, i+5);
       }
       Moves.undoMove(b, availableMoves.substring(i, i+5));
@@ -185,7 +192,7 @@ public class Moves {
     for (int i = 0; i < moves.length(); i+= 5) {
       Board b1 = new Board(b.board);
       Moves.makeMoveVerified(b1, moves.substring(i, i+5));
-      if (!isInCheck(b1.board, isWhite)) eliminated+= moves.substring(i, i+5);
+      if (!isInCheck(b1.board, isWhite, b.kingLocs)) eliminated+= moves.substring(i, i+5);
       undoMove(b1, moves.substring(i, i+5));
     }
     return eliminated;
@@ -549,8 +556,8 @@ public class Moves {
       if (isAvailableForWhite(b.board[i-1][j+1])) {
         moves+= "" + i + j + (i-1) + (j+1) + " ";
       }
-      if (b.CWK && b.board[9][7] == ' ' && b.board[9][8] == ' ') moves+= "9698 "; // White kingside castling
-      if (b.CWQ && b.board[9][5] == ' ' && b.board[9][4] == ' ' && b.board[9][3] == ' ') moves+= "9694 ";
+      //if (b.CWK && b.board[9][7] == ' ' && b.board[9][8] == ' ') moves+= "9698 "; // White kingside castling
+      //if (b.CWQ && b.board[9][5] == ' ' && b.board[9][4] == ' ' && b.board[9][3] == ' ') moves+= "9694 ";
     } else {
       if (isAvailableForBlack(b.board[i+1][j])) {
         moves+= "" + i + j + (i+1) + j + " ";
@@ -576,12 +583,12 @@ public class Moves {
       if (isAvailableForBlack(b.board[i-1][j+1])) {
         moves+= "" + i + j + (i-1) + (j+1) + " ";
       }
-      if (b.CWK && b.board[2][7] == ' ' && b.board[2][8] == ' ') moves+= "2628 "; // White kingside castling
-      if (b.CWQ && b.board[2][5] == ' ' && b.board[2][4] == ' ' && b.board[2][3] == ' ') moves+= "2624 ";
+      //if (b.CWK && b.board[2][7] == ' ' && b.board[2][8] == ' ') moves+= "2628 "; // White kingside castling
+      //if (b.CWQ && b.board[2][5] == ' ' && b.board[2][4] == ' ' && b.board[2][3] == ' ') moves+= "2624 ";
     }
     return moves;
   }
-  public static boolean isInCheck(char[][] board, boolean white) {
+  /*public static boolean isInCheck(char[][] board, boolean white) {
     int kingLocI = 2, kingLocJ = 2;
     if (white) {
       for (int i = 2; i < 10; i++) {
@@ -605,10 +612,12 @@ public class Moves {
       }
     }
     return isInCheck(board, white, kingLocI, kingLocJ);
-  }
-  public static boolean isInCheck(char[][] board, boolean white, int kingLocI, int kingLocJ) {
+  } */
+  public static boolean isInCheck(char[][] board, boolean white, int[] kingLocs) {
     // New, much more efficient method:
     if (white) {
+      int kingLocI = kingLocs[0];
+      int kingLocJ = kingLocs[1];
       // Find possible pawn checks:
       if (board[kingLocI-1][kingLocJ+1] == 'p' || board[kingLocI-1][kingLocJ-1] == 'p') return true;
       // Find possible knight checks:
@@ -672,6 +681,8 @@ public class Moves {
       }
       // possible BUG: kings would be allowed to touch? maybe we need to add another part to this to avoid that?
     } else {
+      int kingLocI = kingLocs[2];
+      int kingLocJ = kingLocs[3];
       // Find possible pawn checks:
       if (board[kingLocI+1][kingLocJ+1] == 'P' || board[kingLocI+1][kingLocJ-1] == 'P') return true;
       // Find possible knight checks:

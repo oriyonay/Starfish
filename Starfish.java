@@ -6,7 +6,6 @@ import java.util.ArrayList;
 public class Starfish {
   public static boolean whiteToPlay = true;
   public static void main(String[] args) {
-    // testing shit
     // main:
     Utils.printLogo();
     playStarfish();
@@ -112,7 +111,7 @@ public class Starfish {
         System.out.print("\nStarfish's turn: ");
         // IDEA: Perhaps add a feature where Starfish could decide to resign if static eval < SOME_NUMBER?
         long startTime = System.nanoTime();
-        computerMove = Evaluation.getBestMove(b, 3, -Constants.INF, Constants.INF, false);
+        computerMove = Evaluation.getBestMove(b, 5, -Constants.INF, Constants.INF, false);
         Moves.makeMove(b, computerMove, whiteTurn);
         // add Starfish's move to the move history
         moveHistory.add(computerMove);

@@ -4,6 +4,7 @@ public class Board {
   public static char[][] board;
   public static boolean whiteTurn = true; // we assume white goes first, even if FEN is imported
   public static String moveHistoryPiecesRemoved = " ";
+  public static int[] kingLocs = {9, 6, 2, 6};
   public static boolean CWK = true, CWQ = true, CBK = true, CBQ = true; // castle rights
   public Board() {
     // standard chess board
@@ -47,6 +48,18 @@ public class Board {
       if (fenSplit[2].indexOf('k') >= 0) CBK = true;
       if (fenSplit[2].indexOf('q') >= 0) CBQ = true;
     } catch (Exception e) {} // do nothing
+    // find kings:
+    for (int i = 2; i < 10; i++) {
+      for (int j = 2; j < 10; j++) {
+        if (board[i][j] == 'K') {
+          kingLocs[0] = i;
+          kingLocs[1] = j;
+        } else if (board[i][j] == 'k') {
+          kingLocs[2] = i;
+          kingLocs[3] = j;
+        }
+      }
+    }
     printBoard();
   }
   public static char[][] getStandardBoard() {
