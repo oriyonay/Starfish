@@ -34,12 +34,24 @@ public class Moves {
   }
   public static void makeMoveVerified(Board b, String move) {
     // NOTE: This function assumes validity of input!
+    // EXPERIMENTAL: update board's castle rights history:
+    
+
     int from = Integer.parseInt(move.substring(0, 2));
     int to = Integer.parseInt(move.substring(2, 4));
     b.moveHistoryPiecesRemoved += b.board[to/10][to%10];
     b.board[to/10][to%10] = b.board[from/10][from%10];
     b.board[from/10][from%10] = ' ';
     if (move.charAt(4) != ' ') b.board[to/10][to%10] = move.charAt(4);
+  }
+  public static boolean makeMoveActual(Board b, String move, boolean whiteToPlay) {
+    /* Difference between makeMoveVerified and makeMoveActual:
+     * makeMoveActual makes the move AND MODIFIES CASTLING RIGHTS
+     * while makeMoveVerified only makes the move (and is used by alpha-beta)
+     * to evaluate future positions. We do this to prevent alphaBeta from changing
+     * castling rights in future calculated positions (that are not the current position). */
+     // NOT FINISHED
+    return true;
   }
   /*public static boolean makeMoveCastle(Board b, String move, boolean whiteToPlay) {
     // NOTE: We can explicitly define castling here to shave processing time a tiny bit.
@@ -90,11 +102,11 @@ public class Moves {
   public static void undoMove(Board b, String move) {
     // THIS ASSUMES CORRECT INPUT (as the user doesn't touch this function)
     // note: this does not mean perfect input ;)
+    // EXPERIMENTAL: Undo board's castle rights history:
+
     int to = Integer.parseInt(move.substring(0, 2));
     int from = Integer.parseInt(move.substring(2, 4));
     b.board[to/10][to%10] = b.board[from/10][from%10];
-    //b.board[from/10][from%10] = b.lastMovePieceRemoved;
-    //b.lastMovePieceRemoved = ' ';
     b.board[from/10][from%10] = b.moveHistoryPiecesRemoved.charAt(b.moveHistoryPiecesRemoved.length()-1);
     b.moveHistoryPiecesRemoved = b.moveHistoryPiecesRemoved.substring(0, b.moveHistoryPiecesRemoved.length()-1);
   }
@@ -107,12 +119,14 @@ public class Moves {
     String availableMoves = Moves.availableMovesNC(b, isWhite);
     String moves = "";
     for (int i = 0; i < availableMoves.length(); i+= 5) {
-      Board b1 = new Board(b.board);
-      Moves.makeMoveVerified(b1, availableMoves.substring(i, i+5));
-      if (!isInCheck(b1.board, isWhite)) moves+= availableMoves.substring(i, i+5);
-      Moves.undoMove(b1, availableMoves.substring(i, i+5));
+      Moves.makeMoveVerified(b, availableMoves.substring(i, i+5));
+      if (!isInCheck(b.board, isWhite)) {
+        moves+= availableMoves.substring(i, i+5);
+      }
+      Moves.undoMove(b, availableMoves.substring(i, i+5));
     }
-    return moves;
+    return availableMoves;
+    //return eliminateIllegalMoves(b, moves, isWhite);
   }
   public static String availableMovesNC(Board b, boolean isWhite) { // NC = No Check
     return eliminateIllegalMoves(b, availableMovesNCDE(b, isWhite), isWhite);
@@ -123,29 +137,29 @@ public class Moves {
   public static String availableMovesNCDE(Board b, boolean isWhite) { // NC = No Check, DE = Don't eliminate, NC = No castle
     // This method assumes the king is NOT in check!
     String moves = "";
-    // NOTE: We could have made this more efficient by sorting the moves
+    // NOTE: We could make this more efficient by sorting the moves
     if (isWhite) {
       for (int i = 2; i < 10; i++) {
         for (int j = 2; j < 10; j++) {
           switch (b.board[i][j]) {
             case ' ': break;
             case 'P':
-              moves+= movesWP(b.board, i, j);
+              moves+= movesWP(b, i, j);
               break;
             case 'N':
-              moves+= movesN(b.board, i, j);
+              moves+= movesN(b, i, j);
               break;
             case 'R':
-              moves+= movesR(b.board, i, j, true);
+              moves+= movesR(b, i, j, true);
               break;
             case 'B':
-              moves+= movesB(b.board, i, j, true);
+              moves+= movesB(b, i, j, true);
               break;
             case 'Q':
-              moves+= movesQ(b.board, i, j, true);
+              moves+= movesQ(b, i, j, true);
               break;
             case 'K':
-              moves+= movesK(b.board, i, j, true);
+              moves+= movesK(b, i, j, true);
               break;
           }
         }
@@ -157,22 +171,22 @@ public class Moves {
           switch(b.board[i][j]) {
             case ' ': break;
             case 'p':
-              moves+= movesBP(b.board, i, j);
+              moves+= movesBP(b, i, j);
               break;
             case 'n':
-              moves+= movesN(b.board, i, j);
+              moves+= movesN(b, i, j);
               break;
             case 'r':
-              moves+= movesR(b.board, i, j, false);
+              moves+= movesR(b, i, j, false);
               break;
             case 'b':
-              moves+= movesB(b.board, i, j, false);
+              moves+= movesB(b, i, j, false);
               break;
             case 'q':
-              moves+= movesQ(b.board, i, j, false);
+              moves+= movesQ(b, i, j, false);
               break;
             case 'k':
-              moves+= movesK(b.board, i, j, false);
+              moves+= movesK(b, i, j, false);
           }
         }
       }
@@ -204,192 +218,165 @@ public class Moves {
     }
     return possibleCastle;
   }*/
-  public static String movesWP(char[][] board, int i, int j) {
+  public static String movesWP(Board b, int i, int j) {
     // moves for the white pawn
     String moves = "";
-    if (i == 8 && board[7][j] == ' ' && board[6][j] == ' ') {
-      //System.out.println("pawn at " + j + " can move twice: " + i + j + (i-2) + j + " ");
+    if (i == 8 && b.board[7][j] == ' ' && b.board[6][j] == ' ') {
       moves+= "" + i + j + (i-2) + j + " ";
     }
-    if (board[i-1][j] == ' ' && i != 3) {
-      //System.out.println("open space in front of pawn at j=" + j + ": " + i + j + (i-1) + j + " ");
+    if (b.board[i-1][j] == ' ' && i != 3) {
       moves+= "" + i + j + (i-1) + j + " ";
     }
-    if (Character.isLowerCase(board[i-1][j-1])) {
-      //System.out.println("pawn at j=" + j + " can take to the left: " + i + j + (i-1) + (j-1) + " ");
+    if (Character.isLowerCase(b.board[i-1][j-1])) {
       moves+= "" + i + j + (i-1) + (j-1) + " ";
     }
-    if (Character.isLowerCase(board[i-1][j+1])) {
-      //System.out.println("pawn at j=" + j + " can take to the right: " + i + j + (i-1) + (j+1) + " ");
+    if (Character.isLowerCase(b.board[i-1][j+1])) {
       moves+= "" + i + j + (i-1) + (j+1) + " ";
     }
-    if (i == 3 && board[2][j] == ' ') {
-      //System.out.println("pawn at j = " + j + " can promote: " + i + j + (i-1) + j + "Q");
+    if (i == 3 && b.board[2][j] == ' ') {
       moves+= "" + i + j + (i-1) + j + "Q";
     }
     return moves;
   }
-  public static String movesBP(char[][] board, int i, int j) {
+  public static String movesBP(Board b, int i, int j) {
     // moves for the black pawn
     String moves = "";
-    if (i == 3 && board[4][j] == ' ' && board[5][j] == ' ') {
-      //System.out.println("pawn at " + j + " can move twice: " + i + j + (i+2) + j + " ");
+    if (i == 3 && b.board[4][j] == ' ' && b.board[5][j] == ' ') {
       moves+= "" + i + j + (i+2) + j + " ";
     }
-    if (board[i+1][j] == ' ' && i != 9) {
-      //System.out.println("open space in front of pawn at j=" + j + ": " + i + j + (i+1) + j + " ");
+    if (b.board[i+1][j] == ' ' && i != 9) {
       moves+= "" + i + j + (i+1) + j + " ";
     }
-    if (Character.isUpperCase(board[i+1][j-1])) {
-      //System.out.println("pawn at j=" + j + " can take to the left: " + i + j + (i+1) + (j-1) + " ");
+    if (Character.isUpperCase(b.board[i+1][j-1])) {
       moves+= "" + i + j + (i+1) + (j-1) + " ";
     }
-    if (Character.isUpperCase(board[i+1][j+1])) {
-      //System.out.println("pawn at j=" + j + " can take to the right: " + i + j + (i+1) + (j+1) + " ");
+    if (Character.isUpperCase(b.board[i+1][j+1])) {
       moves+= "" + i + j + (i+1) + (j+1) + " ";
     }
-    if (i == 9 && board[9][j] == ' ') {
-      //System.out.println("pawn at j = " + j + " can promote: " + i + j + (i+1) + j + "Q");
+    if (i == 9 && b.board[9][j] == ' ') {
       moves+= "" + i + j + (i+1) + j + "Q";
     }
     return moves;
   }
-  public static String movesN(char[][] board, int i, int j) {
+  public static String movesN(Board b, int i, int j) {
     String moves = "";
-    if (Character.isUpperCase(board[i][j])) {
-      if (isAvailableForWhite(board[i-2][j+1])) {
-        //System.out.println("knight at i=" + i + ", j=" + j + " can move twice up and to the right");
+    if (Character.isUpperCase(b.board[i][j])) {
+      if (isAvailableForWhite(b.board[i-2][j+1])) {
         moves+= "" + i + j + (i-2) + (j+1) + " ";
       }
-      if (isAvailableForWhite(board[i-1][j+2])) {
-        //System.out.println("knight at i=" + i + ", j=" + j + " can move once up and twice to the right");
+      if (isAvailableForWhite(b.board[i-1][j+2])) {
         moves+= "" + i + j + (i-1) + (j+2) + " ";
       }
-      if (isAvailableForWhite(board[i+1][j+2])) {
-        //System.out.println("knight at i=" + i + ", j=" + j + " can move once down and twice to the right");
+      if (isAvailableForWhite(b.board[i+1][j+2])) {
         moves+= "" + i + j + (i+1) + (j+2) + " ";
       }
-      if (isAvailableForWhite(board[i+2][j+1])) {
-        //System.out.println("knight at i=" + i + ", j=" + j + " can move twice down and once to the right");
+      if (isAvailableForWhite(b.board[i+2][j+1])) {
         moves+= "" + i + j + (i+2) + (j+1) + " ";
       }
-      if (isAvailableForWhite(board[i+2][j-1])) {
-        //System.out.println("knight at i=" + i + ", j=" + j + " can move twice down and once to the left");
+      if (isAvailableForWhite(b.board[i+2][j-1])) {
         moves+= "" + i + j + (i+2) + (j-1) + " ";
       }
-      if (isAvailableForWhite(board[i+1][j-2])) {
-        //System.out.println("knight at i=" + i + ", j=" + j + " can move once down and twice to the left");
+      if (isAvailableForWhite(b.board[i+1][j-2])) {
         moves+= "" + i + j + (i+1) + (j-2) + " ";
       }
-      if (isAvailableForWhite(board[i-1][j-2])) {
-        //System.out.println("knight at i=" + i + ", j=" + j + " can move once up and to the left");
+      if (isAvailableForWhite(b.board[i-1][j-2])) {
         moves+= "" + i + j + (i-1) + (j-2) + " ";
       }
-      if (isAvailableForWhite(board[i-2][j-1])) {
-        //System.out.println("knight at i=" + i + ", j=" + j + " can move twice up and once to the left");
+      if (isAvailableForWhite(b.board[i-2][j-1])) {
         moves+= "" + i + j + (i-2) + (j-1) + " ";
       }
     } else {
-      if (isAvailableForBlack(board[i-2][j+1])) {
+      if (isAvailableForBlack(b.board[i-2][j+1])) {
         moves+= "" + i + j + (i-2) + (j+1) + " ";
       }
-      if (isAvailableForBlack(board[i-1][j+2])) {
+      if (isAvailableForBlack(b.board[i-1][j+2])) {
         moves+= "" + i + j + (i-1) + (j+2) + " ";
       }
-      if (isAvailableForBlack(board[i+1][j+2])) {
+      if (isAvailableForBlack(b.board[i+1][j+2])) {
         moves+= "" + i + j + (i+1) + (j+2) + " ";
       }
-      if (isAvailableForBlack(board[i+2][j+1])) {
+      if (isAvailableForBlack(b.board[i+2][j+1])) {
         moves+= "" + i + j + (i+2) + (j+1) + " ";
       }
-      if (isAvailableForBlack(board[i+2][j-1])) {
+      if (isAvailableForBlack(b.board[i+2][j-1])) {
         moves+= "" + i + j + (i+2) + (j-1) + " ";
       }
-      if (isAvailableForBlack(board[i+1][j-2])) {
+      if (isAvailableForBlack(b.board[i+1][j-2])) {
         moves+= "" + i + j + (i+1) + (j-2) + " ";
       }
-      if (isAvailableForBlack(board[i-1][j-2])) {
+      if (isAvailableForBlack(b.board[i-1][j-2])) {
         moves+= "" + i + j + (i-1) + (j-2) + " ";
       }
-      if (isAvailableForBlack(board[i-2][j-1])) {
+      if (isAvailableForBlack(b.board[i-2][j-1])) {
         moves+= "" + i + j + (i-2) + (j-1) + " ";
       }
     }
     return moves;
   }
-  public static String movesR(char[][] board, int i, int j, boolean isWhite) {
-    if (isWhite) return movesWR(board, i, j);
-    return movesBR(board, i, j);
+  public static String movesR(Board b, int i, int j, boolean isWhite) {
+    if (isWhite) return movesWR(b, i, j);
+    return movesBR(b, i, j);
   }
-  public static String movesWR(char[][] board, int i, int j) {
+  public static String movesWR(Board b, int i, int j) {
     String moves = "";
     for (int a = i+1; a < 10; a++) {
       // going down:
-      if (board[a][j] == ' ') {
-        //System.out.println("blank space down ");
+      if (b.board[a][j] == ' ') {
         moves+= "" + i + j + a + j + " ";
         continue;
-      } else if (Character.isUpperCase(board[a][j])) {
+      } else if (Character.isUpperCase(b.board[a][j])) {
         break;
       } else {
-        //System.out.println("can capture down ");
         moves+= "" + i + j + a + j + " ";
         break;
       }
     }
     for (int a = i-1; a >= 2; a--) {
       // going up:
-      if (board[a][j] == ' ') {
-        //System.out.println("blank space up ");
+      if (b.board[a][j] == ' ') {
         moves+= "" + i + j + a + j + " ";
         continue;
-      } else if (Character.isUpperCase(board[a][j])) {
+      } else if (Character.isUpperCase(b.board[a][j])) {
         break;
       } else {
-        //ystem.out.println("can capture up ");
         moves+= "" + i + j + a + j + " ";
         break;
       }
     }
     for (int a = j+1; a < 10; a++) {
       // going right:
-      if (board[i][a] == ' ') {
-        //System.out.println("blank space right ");
+      if (b.board[i][a] == ' ') {
         moves+= "" + i + j + i + a + " ";
         continue;
-      } else if (Character.isUpperCase(board[i][a])) {
+      } else if (Character.isUpperCase(b.board[i][a])) {
         break;
       } else {
-        //System.out.println("can capture right ");
         moves+= "" + i + j + i + a + " ";
         break;
       }
     }
     for (int a = j-1; a >= 2; a--) {
       // going left:
-      if (board[i][a] == ' ') {
-        //System.out.println("blank space left ");
+      if (b.board[i][a] == ' ') {
         moves+= "" + i + j +  + i + a + " ";
         continue;
-      } else if (Character.isUpperCase(board[i][a])) {
+      } else if (Character.isUpperCase(b.board[i][a])) {
         break;
       } else {
-        //System.out.println("can capture left ");
         moves+= "" + i + j + i + a + " ";
         break;
       }
     }
     return moves;
   }
-  public static String movesBR(char[][] board, int i, int j) {
+  public static String movesBR(Board b, int i, int j) {
     String moves = "";
     for (int a = i+1; a < 10; a++) {
       // going down:
-      if (board[a][j] == ' ') {
-        //System.out.println("blank space down ");
+      if (b.board[a][j] == ' ') {
         moves+= "" + i + j + a + j + " ";
         continue;
-      } else if (Character.isLowerCase(board[a][j])) {
+      } else if (Character.isLowerCase(b.board[a][j])) {
         break;
       } else {
         //System.out.println("can capture down ");
@@ -399,64 +386,56 @@ public class Moves {
     }
     for (int a = i-1; a >= 2; a--) {
       // going up:
-      if (board[a][j] == ' ') {
-        //System.out.println("blank space up ");
+      if (b.board[a][j] == ' ') {
         moves+= "" + i + j + a + j + " ";
         continue;
-      } else if (Character.isLowerCase(board[a][j])) {
+      } else if (Character.isLowerCase(b.board[a][j])) {
         break;
       } else {
-        //System.out.println("can capture up ");
         moves+= "" + i + j + a + j + " ";
         break;
       }
     }
     for (int a = j+1; a < 10; a++) {
       // going right:
-      if (board[i][a] == ' ') {
-        //System.out.println("blank space right ");
+      if (b.board[i][a] == ' ') {
         moves+= "" + i + j + i + a + " ";
         continue;
-      } else if (Character.isLowerCase(board[i][a])) {
+      } else if (Character.isLowerCase(b.board[i][a])) {
         break;
       } else {
-        //System.out.println("can capture right ");
         moves+= "" + i + j + i + a + " ";
         break;
       }
     }
     for (int a = j-1; a >= 2; a--) {
       // going left:
-      if (board[i][a] == ' ') {
-        //System.out.println("blank space left ");
+      if (b.board[i][a] == ' ') {
         moves+= "" + i + j + i + a + " ";
         continue;
-      } else if (Character.isLowerCase(board[i][a])) {
+      } else if (Character.isLowerCase(b.board[i][a])) {
         break;
       } else {
-        //System.out.println("can capture left ");
         moves+= "" + i + j + i + a + " ";
         break;
       }
     }
     return moves;
   }
-  public static String movesB(char[][] board, int i, int j, boolean isWhite) {
-    if (isWhite) return movesWB(board, i, j);
-    return movesBB(board, i, j);
+  public static String movesB(Board b, int i, int j, boolean isWhite) {
+    if (isWhite) return movesWB(b, i, j);
+    return movesBB(b, i, j);
   }
-  public static String movesWB(char[][] board, int i, int j) {
+  public static String movesWB(Board b, int i, int j) {
     String moves = "";
     for (int a = 1; a < 8; a++) {
       if (i + a < 10 && j + a < 10) {
-        if (board[i+a][j+a] == ' ') {
-          //System.out.println("diagonal down right");
+        if (b.board[i+a][j+a] == ' ') {
           moves+= "" + i + j + (i+a) + (j+a) + " ";
           continue;
-        } else if (Character.isUpperCase(board[i+a][j+a])) {
+        } else if (Character.isUpperCase(b.board[i+a][j+a])) {
           break;
         } else {
-          //System.out.println("capture diagonal down right");
           moves+= "" + i + j + (i+a) + (j+a) + " ";
           break;
         }
@@ -464,13 +443,11 @@ public class Moves {
     }
     for (int a = 1; a < 8; a++) {
       if (i - a >= 2 && j + a < 10) {
-        if (board[i-a][j+a] == ' ') {
-          //System.out.println("diagonal up right");
+        if (b.board[i-a][j+a] == ' ') {
           moves+= "" + i + j + (i-a) + (j+a) + " ";
-        } else if (Character.isUpperCase(board[i-a][j+a])) {
+        } else if (Character.isUpperCase(b.board[i-a][j+a])) {
           break;
         } else {
-          //System.out.println("capture diagonal up right");
           moves+= "" + i + j + (i-a) + (j+a) + " ";
           break;
         }
@@ -478,13 +455,11 @@ public class Moves {
     }
     for (int a = 1; a < 8; a++) {
       if (i + a < 10 && j - a >= 2) {
-        if (board[i+a][j-a] == ' ') {
-          //System.out.println("diagonal down left");
+        if (b.board[i+a][j-a] == ' ') {
           moves+= "" + i + j + (i+a) + (j-a) + " ";
-        } else if (Character.isUpperCase(board[i+a][j-a])) {
+        } else if (Character.isUpperCase(b.board[i+a][j-a])) {
           break;
         } else {
-          //System.out.println("capture diagonal down left");
           moves+= "" + i + j + (i+a) + (j-a) + " ";
           break;
         }
@@ -492,13 +467,11 @@ public class Moves {
     }
     for (int a = 1; a < 8; a++) {
       if (i - a >= 2 && j - a >= 2) {
-        if (board[i-a][j-a] == ' ') {
-          //System.out.println("diagonal up left");
+        if (b.board[i-a][j-a] == ' ') {
           moves+= "" + i + j + (i-a) + (j-a) + " ";
-        } else if (Character.isUpperCase(board[i-a][j-a])) {
+        } else if (Character.isUpperCase(b.board[i-a][j-a])) {
           break;
         } else {
-          //System.out.println("capture diagonal up left");
           moves+= "" + i + j + (i-a) + (j-a) + " ";
           break;
         }
@@ -506,18 +479,16 @@ public class Moves {
     }
     return moves;
   }
-  public static String movesBB(char[][] board, int i, int j) {
+  public static String movesBB(Board b, int i, int j) {
     String moves = "";
     for (int a = 1; a < 8; a++) {
       if (i + a < 10 && j + a < 10) {
-        if (board[i+a][j+a] == ' ') {
-          //System.out.println("diagonal down right");
+        if (b.board[i+a][j+a] == ' ') {
           moves+= "" + i + j + (i+a) + (j+a) + " ";
           continue;
-        } else if (Character.isLowerCase(board[i+a][j+a])) {
+        } else if (Character.isLowerCase(b.board[i+a][j+a])) {
           break;
         } else {
-          //System.out.println("capture diagonal down right");
           moves+= "" + i + j + (i+a) + (j+a) + " ";
           break;
         }
@@ -525,13 +496,11 @@ public class Moves {
     }
     for (int a = 1; a < 8; a++) {
       if (i - a >= 2 && j + a < 10) {
-        if (board[i-a][j+a] == ' ') {
-          //System.out.println("diagonal up right");
+        if (b.board[i-a][j+a] == ' ') {
           moves+= "" + i + j + (i-a) + (j+a) + " ";
-        } else if (Character.isLowerCase(board[i-a][j+a])) {
+        } else if (Character.isLowerCase(b.board[i-a][j+a])) {
           break;
         } else {
-          //System.out.println("capture diagonal up right");
           moves+= "" + i + j + (i-a) + (j+a) + " ";
           break;
         }
@@ -539,13 +508,11 @@ public class Moves {
     }
     for (int a = 1; a < 8; a++) {
       if (i + a < 10 && j - a >= 2) {
-        if (board[i+a][j-a] == ' ') {
-          //System.out.println("diagonal down left");
+        if (b.board[i+a][j-a] == ' ') {
           moves+= "" + i + j + (i+a) + (j-a) + " ";
-        } else if (Character.isLowerCase(board[i+a][j-a])) {
+        } else if (Character.isLowerCase(b.board[i+a][j-a])) {
           break;
         } else {
-          //System.out.println("capture diagonal down left");
           moves+= "" + i + j + (i+a) + (j-a) + " ";
           break;
         }
@@ -553,13 +520,11 @@ public class Moves {
     }
     for (int a = 1; a < 8; a++) {
       if (i - a >= 2 && j - a >= 2) {
-        if (board[i-a][j-a] == ' ') {
-          //System.out.println("diagonal up left");
+        if (b.board[i-a][j-a] == ' ') {
           moves+= "" + i + j + (i-a) + (j-a) + " ";
-        } else if (Character.isLowerCase(board[i-a][j-a])) {
+        } else if (Character.isLowerCase(b.board[i-a][j-a])) {
           break;
         } else {
-          //System.out.println("capture diagonal up left");
           moves+= "" + i + j + (i-a) + (j-a) + " ";
           break;
         }
@@ -567,85 +532,71 @@ public class Moves {
     }
     return moves;
   }
-  public static String movesQ(char[][] board, int i, int j, boolean isWhite) {
+  public static String movesQ(Board b, int i, int j, boolean isWhite) {
     // the queen is a rook-bishop hybrid:
-    return movesR(board, i, j, isWhite) + movesB(board, i, j, isWhite);
+    return movesR(b, i, j, isWhite) + movesB(b, i, j, isWhite);
   }
-  public static String movesK(char[][] board, int i, int j, boolean isWhite) {
+  public static String movesK(Board b, int i, int j, boolean isWhite) {
     String moves = "";
     if (isWhite) {
-      if (isAvailableForWhite(board[i+1][j])) {
-        //System.out.println("down");
+      if (isAvailableForWhite(b.board[i+1][j])) {
         moves+= "" + i + j + (i+1) + j + " ";
       }
-      if (isAvailableForWhite(board[i+1][j+1])) {
-        //System.out.println("down right");
+      if (isAvailableForWhite(b.board[i+1][j+1])) {
         moves+= "" + i + j + (i+1) + (j+1) + " ";
       }
-      if (isAvailableForWhite(board[i][j+1])) {
-        //System.out.println("right");
+      if (isAvailableForWhite(b.board[i][j+1])) {
         moves+= "" + i + j + i + (j+1) + " ";
       }
-      if (isAvailableForWhite(board[i-1][j+1])) {
-        //System.out.println("up right");
+      if (isAvailableForWhite(b.board[i-1][j+1])) {
         moves+= "" + i + j + (i-1) + (j+1) + " ";
       }
-      if (isAvailableForWhite(board[i-1][j])) {
-        //System.out.println("up");
+      if (isAvailableForWhite(b.board[i-1][j])) {
         moves+= "" + i + j + (i-1) + j + " ";
       }
-      if (isAvailableForWhite(board[i-1][j-1])) {
-        //System.out.println("up left");
+      if (isAvailableForWhite(b.board[i-1][j-1])) {
         moves+= "" + i + j + (i-1) + (j-1) + " ";
       }
-      if (isAvailableForWhite(board[i][j-1])) {
-        //System.out.println("left");
+      if (isAvailableForWhite(b.board[i][j-1])) {
         moves+= "" + i + j + i + (j-1) + " ";
       }
-      if (isAvailableForWhite(board[i-1][j+1])) {
-        //System.out.println("down left");
+      if (isAvailableForWhite(b.board[i-1][j+1])) {
         moves+= "" + i + j + (i-1) + (j+1) + " ";
       }
+      if (b.CWK && b.board[9][7] == ' ' && b.board[9][8] == ' ') moves+= "9698 "; // White kingside castling
+      if (b.CWQ && b.board[9][5] == ' ' && b.board[9][4] == ' ' && b.board[9][3] == ' ') moves+= "9694 ";
     } else {
-      if (isAvailableForBlack(board[i+1][j])) {
-        //System.out.println("down");
+      if (isAvailableForBlack(b.board[i+1][j])) {
         moves+= "" + i + j + (i+1) + j + " ";
       }
-      if (isAvailableForBlack(board[i+1][j+1])) {
-        //System.out.println("down right");
+      if (isAvailableForBlack(b.board[i+1][j+1])) {
         moves+= "" + i + j + (i+1) + (j+1) + " ";
       }
-      if (isAvailableForBlack(board[i][j+1])) {
-        //System.out.println("right");
+      if (isAvailableForBlack(b.board[i][j+1])) {
         moves+= "" + i + j + i + (j+1) + " ";
       }
-      if (isAvailableForBlack(board[i-1][j+1])) {
-        //System.out.println("up right");
+      if (isAvailableForBlack(b.board[i-1][j+1])) {
         moves+= "" + i + j + (i-1) + (j+1) + " ";
       }
-      if (isAvailableForBlack(board[i-1][j])) {
-        //System.out.println("up");
+      if (isAvailableForBlack(b.board[i-1][j])) {
         moves+= "" + i + j + (i-1) + j + " ";
       }
-      if (isAvailableForBlack(board[i-1][j-1])) {
-        //System.out.println("up left");
+      if (isAvailableForBlack(b.board[i-1][j-1])) {
         moves+= "" + i + j + (i-1) + (j-1) + " ";
       }
-      if (isAvailableForBlack(board[i][j-1])) {
-        //System.out.println("left");
+      if (isAvailableForBlack(b.board[i][j-1])) {
         moves+= "" + i + j + i + (j-1) + " ";
       }
-      if (isAvailableForBlack(board[i-1][j+1])) {
-        //System.out.println("down left");
+      if (isAvailableForBlack(b.board[i-1][j+1])) {
         moves+= "" + i + j + (i-1) + (j+1) + " ";
       }
+      if (b.CWK && b.board[2][7] == ' ' && b.board[2][8] == ' ') moves+= "2628 "; // White kingside castling
+      if (b.CWQ && b.board[2][5] == ' ' && b.board[2][4] == ' ' && b.board[2][3] == ' ') moves+= "2624 ";
     }
     return moves;
   }
   public static boolean isInCheck(char[][] board, boolean white) {
-    // New, much more efficient method:
-    // find the king:
-    int kingLocI = 2, kingLocJ = 2; // 0, 0 in padded board notation
+    int kingLocI = 2, kingLocJ = 2;
     if (white) {
       for (int i = 2; i < 10; i++) {
         for (int j = 2; j < 10; j++) {
@@ -656,6 +607,22 @@ public class Moves {
           }
         }
       }
+    } else {
+      for (int i = 2; i < 10; i++) {
+        for (int j = 2; j < 10; j++) {
+          if (board[i][j] == 'k') {
+            kingLocI = i;
+            kingLocJ = j;
+            break;
+          }
+        }
+      }
+    }
+    return isInCheck(board, white, kingLocI, kingLocJ);
+  }
+  public static boolean isInCheck(char[][] board, boolean white, int kingLocI, int kingLocJ) {
+    // New, much more efficient method:
+    if (white) {
       // Find possible pawn checks:
       if (board[kingLocI-1][kingLocJ+1] == 'p' || board[kingLocI-1][kingLocJ-1] == 'p') return true;
       // Find possible knight checks:
@@ -677,9 +644,9 @@ public class Moves {
       }
       for (int a = 1; a < 8; a++) {
         if (kingLocI - a >= 2 && kingLocJ - a >= 2) {
-          if (board[kingLocI-a][kingLocI-a] == ' ') continue;
+          if (board[kingLocI-a][kingLocJ-a] == ' ') continue;
           if (Character.isUpperCase(board[kingLocI-a][kingLocJ-a])) break;
-          else if (board[kingLocI-a][kingLocI-a] == 'b' || board[kingLocI-a][kingLocJ-a] == 'q') return true;
+          else if (board[kingLocI-a][kingLocJ-a] == 'b' || board[kingLocI-a][kingLocJ-a] == 'q') return true;
         }
       }
       for (int a = 1; a < 8; a++) {
@@ -691,7 +658,7 @@ public class Moves {
       }
       for (int a = 1; a < 8; a++) {
         if (kingLocI + a < 10 && kingLocJ + a < 10) {
-          if (board[kingLocI+a][kingLocI+a] == ' ') continue;
+          if (board[kingLocI+a][kingLocJ+a] == ' ') continue;
           if (Character.isUpperCase(board[kingLocI+a][kingLocJ+a])) break;
           else if (board[kingLocI+a][kingLocJ+a] == 'b' || board[kingLocI+a][kingLocJ+a] == 'q') return true;
         }
@@ -719,15 +686,6 @@ public class Moves {
       }
       // possible BUG: kings would be allowed to touch? maybe we need to add another part to this to avoid that?
     } else {
-      for (int i = 2; i < 10; i++) {
-        for (int j = 2; j < 10; j++) {
-          if (board[i][j] == 'k') {
-            kingLocI = i;
-            kingLocJ = j;
-            break;
-          }
-        }
-      }
       // Find possible pawn checks:
       if (board[kingLocI+1][kingLocJ+1] == 'P' || board[kingLocI+1][kingLocJ-1] == 'P') return true;
       // Find possible knight checks:
@@ -749,9 +707,9 @@ public class Moves {
       }
       for (int a = 1; a < 8; a++) {
         if (kingLocI + a < 10 && kingLocJ + a < 10) {
-          if (board[kingLocI+a][kingLocI+a] == ' ') continue;
+          if (board[kingLocI+a][kingLocJ+a] == ' ') continue;
           if (Character.isLowerCase(board[kingLocI+a][kingLocJ+a])) break;
-          else if (board[kingLocI+a][kingLocI+a] == 'B' || board[kingLocI+a][kingLocJ+a] == 'Q') return true;
+          else if (board[kingLocI+a][kingLocJ+a] == 'B' || board[kingLocI+a][kingLocJ+a] == 'Q') return true;
         }
       }
       for (int a = 1; a < 8; a++) {
@@ -763,7 +721,7 @@ public class Moves {
       }
       for (int a = 1; a < 8; a++) {
         if (kingLocI - a >= 2 && kingLocJ - a >= 2) {
-          if (board[kingLocI-a][kingLocI-a] == ' ') continue;
+          if (board[kingLocI-a][kingLocJ-a] == ' ') continue;
           if (Character.isLowerCase(board[kingLocI-a][kingLocJ-a])) break;
           else if (board[kingLocI-a][kingLocJ-a] == 'B' || board[kingLocI-a][kingLocJ-a] == 'Q') return true;
         }

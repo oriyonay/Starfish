@@ -3,10 +3,8 @@ package starfish;
 public class Board {
   public static char[][] board;
   public static boolean whiteTurn = true; // we assume white goes first, even if FEN is imported
-  //public static char lastMovePieceRemoved = ' '; // if the most recent move was D2D4, this would be what used to be on D4
   public static String moveHistoryPiecesRemoved = " ";
-  public static boolean[][] whiteSafetyBoard = paddedSafetyBoard();
-  public static boolean[][] blackSafetyBoard = paddedSafetyBoard();
+  public static String[] castleRightsHistory = {"", "", "", ""}; // 1 for true, 0 for false
   public static boolean CWK = true, CWQ = true, CBK = true, CBQ = true; // castle rights
   public Board() {
     // standard chess board
@@ -16,7 +14,6 @@ public class Board {
     this.board = Utils.deepCopy(board);
   }
   public Board(String FEN) {
-    // TO BE IMPLEMENTED
     // for FEN importing:
     board = new char[12][12];
     CWK = false; CWQ = false; CBK = false; CBQ = false;
@@ -146,7 +143,7 @@ public class Board {
   }
   public static void printBoardBlack() {
     // prints itself from Black's perspective
-    for (int i = 9; i > 1; i--) { // 2 3 4 5 6 7 8 9 --> 9 8 7 6 5 4 3 2
+    for (int i = 9; i > 1; i--) {
       for (int j = 9; j > 1; j--) {
         System.out.print(board[i][j] + "|");
       }

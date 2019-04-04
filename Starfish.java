@@ -7,6 +7,7 @@ public class Starfish {
   public static boolean whiteToPlay = true;
   public static void main(String[] args) {
     // testing shit
+    // main:
     Utils.printLogo();
     playStarfish();
     /*long startTime = System.nanoTime();
@@ -49,14 +50,12 @@ public class Starfish {
     }
   }
   public static void playStarfish() {
-    //Board b = new Board(Board.getSunilBoard());
     Board b = new Board();
     boolean whiteTurn = b.whiteTurn; // could just be set to true, but could be useful later
     b.printBoard();
     Scanner in = new Scanner(System.in);
     String userMove = "";
     String computerMove = "";
-    //String lastLegalUserMove = ""; // used for undoing moves
     ArrayList<String> moveHistory = new ArrayList<String>();
     while (!Evaluation.isGameOver(b, whiteTurn)) {
       if (whiteTurn) {
@@ -113,7 +112,7 @@ public class Starfish {
         System.out.print("\nStarfish's turn: ");
         // IDEA: Perhaps add a feature where Starfish could decide to resign if static eval < SOME_NUMBER?
         long startTime = System.nanoTime();
-        computerMove = Evaluation.getBestMove(b, 4, -Constants.INF, Constants.INF, false);
+        computerMove = Evaluation.getBestMove(b, 5, -Constants.INF, Constants.INF, false);
         Moves.makeMove(b, computerMove, whiteTurn);
         // add Starfish's move to the move history
         moveHistory.add(computerMove);
