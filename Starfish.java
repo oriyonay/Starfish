@@ -9,6 +9,7 @@ public class Starfish {
     // main:
     //playAgainstYourself();
     Utils.printLogo();
+    Utils.printHelpMenu();
     playStarfish();
     /*long startTime = System.nanoTime();
     Evaluation.getBestMove(b, 3, -Constants.INF, Constants.INF, false);
@@ -73,6 +74,10 @@ public class Starfish {
         }*/
         userMove = in.nextLine();
         if (userMove.equalsIgnoreCase("exit")) return;
+        if (userMove.startsWith("help")) {
+          Utils.printHelpMenu();
+          continue;
+        }
         if (userMove.equalsIgnoreCase("resign")) {
           System.out.println("User resigns. Starfish wins!");
           return;

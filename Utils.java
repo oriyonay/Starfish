@@ -22,4 +22,10 @@ public class Utils {
     System.out.println();
     System.out.println("Version 0.3, written by Ori Yonay\n");
   }
+  public static void printHelpMenu() {
+    System.out.println("Help: use 'exit' or 'resign' to quit.");
+    System.out.println("To import a FEN position, use 'import [FEN STRING]'.'");
+    System.out.println("To export a FEN string, use 'export', or 'export!' to quit after exporting.");
+    System.out.println("To undo a move, type 'undo'.\n");
+  }
 }
