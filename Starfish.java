@@ -7,6 +7,7 @@ public class Starfish {
   public static boolean whiteToPlay = true;
   public static void main(String[] args) {
     // main:
+    //playAgainstYourself();
     Utils.printLogo();
     playStarfish();
     /*long startTime = System.nanoTime();
@@ -123,4 +124,38 @@ public class Starfish {
       b.printBoard();
     }
   }
+
+
+
+  public static void playAgainstYourself() {
+    Board b = new Board();
+    boolean whiteTurn = b.whiteTurn; // could just be set to true, but could be useful later
+    b.printBoard();
+    String computerMove = "";
+    while (!Evaluation.isGameOver(b, whiteTurn)) {
+      if (whiteTurn) {
+        System.out.println("White's turn:");
+        long startTime = System.nanoTime();
+        computerMove = Evaluation.getBestMove(b, 5, -Constants.INF, Constants.INF, true);
+        long endTime = System.nanoTime();
+        Moves.makeMove(b, computerMove, whiteTurn);
+        System.out.println("Calculation took " + (endTime - startTime)/1000000 + "ms\n");
+
+      } else {
+        System.out.print("Black's turn: ");
+        long startTime = System.nanoTime();
+        computerMove = Evaluation.getBestMove(b, 5, -Constants.INF, Constants.INF, false);
+        Moves.makeMove(b, computerMove, whiteTurn);
+        long endTime = System.nanoTime();
+        System.out.println("Calculation took " + (endTime - startTime)/1000000 + "ms\n");
+        //b.printBoard();
+      }
+      whiteTurn = !whiteTurn;
+      b.printBoard();
+    }
+  }
+
+
+
+
 }

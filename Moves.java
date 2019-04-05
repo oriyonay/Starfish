@@ -102,6 +102,14 @@ public class Moves {
     // note: this does not mean perfect input ;)
     int to = Integer.parseInt(move.substring(0, 2));
     int from = Integer.parseInt(move.substring(2, 4));
+    // undo king location movement:
+    if (b.board[from/10][from%10] == 'K') {
+      b.kingLocs[0] = to/10;
+      b.kingLocs[1] = to%10;
+    } else if (b.board[from/10][from%10] == 'k') {
+      b.kingLocs[2] = to/10;
+      b.kingLocs[3] = to%10;
+    }
     b.board[to/10][to%10] = b.board[from/10][from%10];
     b.board[from/10][from%10] = b.moveHistoryPiecesRemoved.charAt(b.moveHistoryPiecesRemoved.length()-1);
     b.moveHistoryPiecesRemoved = b.moveHistoryPiecesRemoved.substring(0, b.moveHistoryPiecesRemoved.length()-1);
