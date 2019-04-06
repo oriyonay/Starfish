@@ -106,22 +106,7 @@ public class Board {
     if (CBQ) FEN+= "q";
     return FEN;
   }
-  public static char[][] getSunilBoard() {
-    return new char[][] {
-      {'-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'},
-      {'-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'},
-      {'-', '-', ' ', ' ', 'Q', ' ', 'n', 'k', ' ', 'r', '-', '-'},
-      {'-', '-', 'P', ' ', ' ', ' ', ' ', ' ', 'p', ' ', '-', '-'},
-      {'-', '-', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '-', '-'},
-      {'-', '-', ' ', ' ', ' ', ' ', 'p', ' ', ' ', 'p', '-', '-'},
-      {'-', '-', ' ', ' ', ' ', 'p', ' ', ' ', ' ', ' ', '-', '-'},
-      {'-', '-', ' ', ' ', ' ', 'P', ' ', ' ', ' ', ' ', '-', '-'},
-      {'-', '-', ' ', 'P', ' ', ' ', ' ', 'P', 'P', 'P', '-', '-'},
-      {'-', '-', ' ', ' ', ' ', ' ', 'K', ' ', ' ', 'R', '-', '-'},
-      {'-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'},
-      {'-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'}};
-  }
-  public static boolean[][] paddedSafetyBoard() {
+  /*public static boolean[][] paddedSafetyBoard() {
     // not the most efficient, but it works.
     // plus, this method is called twice in the game so it doesn't really matter
     boolean[][] safetyBoard = new boolean[12][12];
@@ -132,7 +117,8 @@ public class Board {
       }
     }
     return safetyBoard;
-  }
+  }*/ 
+
   public static void printBoard(char[][] board) {
     // class function that prints any board
     for (int i = 2; i < 10; i++) {
@@ -143,6 +129,7 @@ public class Board {
     }
     System.out.print(System.lineSeparator());
   }
+
   public static void printBoard() {
     // prints itself
     for (int i = 2; i < 10; i++) {
@@ -153,6 +140,7 @@ public class Board {
     }
     System.out.print(System.lineSeparator());
   }
+
   public static void printBoardBlack() {
     // prints itself from Black's perspective
     for (int i = 9; i > 1; i--) {
@@ -163,6 +151,7 @@ public class Board {
     }
     System.out.print(System.lineSeparator());
   }
+
   public static void printSafetyBoard(boolean[][] safety) {
     for (int i = 0; i < 12; i++) {
       for (int j = 0; j < 12; j++) {
