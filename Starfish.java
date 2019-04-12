@@ -72,7 +72,6 @@ public class Starfish {
           System.out.println("\tCBQ = " + b.CBQ);
           System.out.println();
         }*/
-        System.out.println("DEBUG: Possible castling currently: " + Moves.possibleCastle(b, true));
         userMove = in.nextLine();
         if (userMove.equalsIgnoreCase("exit")) return;
         if (userMove.startsWith("help")) {
@@ -93,7 +92,6 @@ public class Starfish {
           moveHistory.remove(moveHistory.size()-1);
           Moves.undoMove(b, moveHistory.get(moveHistory.size()-1));
           moveHistory.remove(moveHistory.size()-1);
-          System.out.println("DEBUG: Castle rights after undoing move: " + b.CWK + ", " + b.CWQ + ", " + b.CBK + ", " + b.CBQ);
           b.printBoard();
           continue;
         }
@@ -112,7 +110,6 @@ public class Starfish {
         while (!Moves.makeMove(b, Moves.algebraToMove(userMove), whiteTurn)) {
           userMove = in.nextLine();
         }
-        System.out.println("DEBUG: Castle rights after making move: " + b.CWK + ", " + b.CWQ + ", " + b.CBK + ", " + b.CBQ);
         // for undoing moves, we keep track of the moves made
         moveHistory.add(Moves.algebraToMove(userMove));
         //b.printBoardBlack();

@@ -73,7 +73,6 @@ public class Moves {
     // Why? Because we know that this must be the case for castling, always. We'll need to test it out though!
     // ANOTHER NOTE: We may not need to check for b.C** rights since the move must be valid if it passes through here?
     // Verify that castling can happen:
-    System.out.println("DEBUG: Inside makeMoveCastle function");
     switch (move) {
       case "9698 ": // White castle kingside
         if (!whiteToPlay || !b.CWK) return false;
