@@ -10,6 +10,8 @@ public class Evaluation {
   public static final int rook    = 500;
   public static final int queen   = 900;
   public static final int king    = 100000;
+  // castle rights constant (experimental):
+  public static final int CASTLE_RIGHTS = 75;
 
   // piece-square tables for the middlegame:
   public static final int[][] pawnMiddleGame = {
@@ -169,6 +171,10 @@ static int king_end_game[] =
       } else return 0; // draw */
     }
     int eval = 0;
+    if (board.CWK) eval+= CASTLE_RIGHTS;
+    if (board.CWQ) eval+= CASTLE_RIGHTS;
+    if (board.CBK) eval-= CASTLE_RIGHTS;
+    if (board.CBQ) eval-= CASTLE_RIGHTS;
     for (int i = 2; i < 10; i++) {
       for (int j = 2; j < 10; j++) {
         switch (board.board[i][j]) {

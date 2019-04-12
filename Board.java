@@ -4,6 +4,7 @@ public class Board {
   public static char[][] board;
   public static boolean whiteTurn = true; // we assume white goes first, even if FEN is imported
   public static String moveHistoryPiecesRemoved = " ";
+  public static String[] castleRightsHistory = {"Y", "Y", "Y", "Y"};
   public static int[] kingLocs = {9, 6, 2, 6};
   public static boolean CWK = true, CWQ = true, CBK = true, CBQ = true; // castle rights
   public Board() {
@@ -117,7 +118,7 @@ public class Board {
       }
     }
     return safetyBoard;
-  }*/ 
+  }*/
 
   public static void printBoard(char[][] board) {
     // class function that prints any board

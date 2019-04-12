@@ -29,34 +29,53 @@ public class Moves {
       System.out.println("White's turn: ");
       return false;
     }
-    /*int from = Integer.parseInt(move.substring(0, 2));
-    boolean possiblyCastle = (move == "9698" || move == "9694" || move == "2628" || move == "2624");
-    if (possiblyCastle && Character.toUpperCase(b.board[from/10][from%10]) == 'K') return makeMoveCastle(b, move, whiteToPlay);*/
+    int from = Integer.parseInt(move.substring(0, 2));
+    boolean possiblyCastle = (move.equals("9698 ") || move.equals("9694 ") || move.equals("2628 ") || move.equals("2624 "));
+    if (possiblyCastle && Character.toUpperCase(b.board[from/10][from%10]) == 'K') return makeMoveCastle(b, move, whiteToPlay);
     makeMoveVerified(b, move);
     return true;
   }
   public static void makeMoveVerified(Board b, String move) {
     // NOTE: This function assumes validity of input!
+    // Generate to and from values from input:
     int from = Integer.parseInt(move.substring(0, 2));
     int to = Integer.parseInt(move.substring(2, 4));
+    // Append castle rights histories:
+    b.castleRightsHistory[0]+= b.CWK ? "Y" : "N";
+    b.castleRightsHistory[1]+= b.CWQ ? "Y" : "N";
+    b.castleRightsHistory[2]+= b.CBK ? "Y" : "N";
+    b.castleRightsHistory[3]+= b.CBQ ? "Y" : "N";
+    // Update position of the kings in board object:
     if (b.board[from/10][from%10] == 'K') {
       b.kingLocs[0] = to/10;
       b.kingLocs[1] = to%10;
+      b.CWK = false;
+      b.CWQ = false;
     } else if (b.board[from/10][from%10] == 'k') {
       b.kingLocs[2] = to/10;
       b.kingLocs[3] = to%10;
+      b.CBK = false;
+      b.CBQ = false;
     }
+    // Check for first-time rook movement:
+    if (b.CWK && move.startsWith("99")) b.CWK = false;
+    if (b.CWQ && move.startsWith("92")) b.CWQ = false;
+    if (b.CBK && move.startsWith("29")) b.CBK = false;
+    if (b.CBQ && move.startsWith("22")) b.CBQ = false;
+    // Make the move on the board:
     b.moveHistoryPiecesRemoved += b.board[to/10][to%10];
     b.board[to/10][to%10] = b.board[from/10][from%10];
     b.board[from/10][from%10] = ' ';
     if (move.charAt(4) != ' ') b.board[to/10][to%10] = move.charAt(4);
   }
-  /*public static boolean makeMoveCastle(Board b, String move, boolean whiteToPlay) {
+  public static boolean makeMoveCastle(Board b, String move, boolean whiteToPlay) {
     // NOTE: We can explicitly define castling here to shave processing time a tiny bit.
     // Why? Because we know that this must be the case for castling, always. We'll need to test it out though!
+    // ANOTHER NOTE: We may not need to check for b.C** rights since the move must be valid if it passes through here?
     // Verify that castling can happen:
+    System.out.println("DEBUG: Inside makeMoveCastle function");
     switch (move) {
-      case "9698": // White castle kingside
+      case "9698 ": // White castle kingside
         if (!whiteToPlay || !b.CWK) return false;
         if (b.board[9][7] != ' ' || b.board[9][8] != ' ') return false;
         // then White kingside castle is legal and we perform it:
@@ -64,8 +83,10 @@ public class Moves {
         b.board[9][9] = ' ';
         b.board[9][8] = 'K';
         b.board[9][7] = 'R';
+        b.CWK = false;
+        b.CWQ = false;
         return true;
-      case "9694": // White castle queenside
+      case "9694 ": // White castle queenside
         if (!whiteToPlay || !b.CWQ) return false;
         if (b.board[9][5] != ' ' || b.board[9][4] != ' ' || b.board[9][3] != ' ') return false;
         // then White queenside castle is legal and we perform it:
@@ -74,8 +95,10 @@ public class Moves {
         // b.board[9][3] is ' ', otherwise the function would have returned false, so no need doing anything
         b.board[9][4] = 'K';
         b.board[9][5] = 'R';
+        b.CWK = false;
+        b.CWQ = false;
         return true;
-      case "2628": // Black castle kingside
+      case "2628 ": // Black castle kingside
         if (whiteToPlay || !b.CBK) return false;
         if (b.board[2][7] != ' ' || b.board[2][8] != ' ') return false;
         // then Black kingside castle is legal and we perform it:
@@ -83,8 +106,10 @@ public class Moves {
         b.board[2][9] = ' ';
         b.board[2][8] = 'K';
         b.board[2][7] = 'R';
+        b.CBK = false;
+        b.CBQ = false;
         return true;
-      case "2624": // Black castle queenside
+      case "2624 ": // Black castle queenside
         if (whiteToPlay || !b.CBQ) return false;
         if (b.board[2][5] != ' ' || b.board[2][4] != ' ' || b.board[2][3] != ' ') return false;
         // then Black queenside castle is legal and we perform it:
@@ -93,15 +118,38 @@ public class Moves {
         // b.board[2][3] is ' ', otherwise the function would have returned false, so no need doing anything
         b.board[2][4] = 'K';
         b.board[2][5] = 'R';
+        b.CBK = false;
+        b.CBQ = false;
         return true;
     }
     return false;
-  } */
+  }
   public static void undoMove(Board b, String move) {
-    // THIS ASSUMES CORRECT INPUT (as the user doesn't touch this function)
+    // THIS ASSUMES VALID INPUT (as the user doesn't touch this function)
     // note: this does not mean perfect input ;)
     int to = Integer.parseInt(move.substring(0, 2));
     int from = Integer.parseInt(move.substring(2, 4));
+    // Undo castle rights history:
+    b.CWK = b.castleRightsHistory[0].endsWith("Y") ? true : false;
+    b.CWQ = b.castleRightsHistory[1].endsWith("Y") ? true : false;
+    b.CBK = b.castleRightsHistory[2].endsWith("Y") ? true : false;
+    b.CBQ = b.castleRightsHistory[3].endsWith("Y") ? true : false;
+    for (int i = 0; i < 4; i++) {
+      b.castleRightsHistory[i] = b.castleRightsHistory[i].substring(0, b.castleRightsHistory[i].length()-1);
+    }
+    if (b.CWK && move.startsWith("9698")) { // if the last move was a castle, we have to move the rook back
+      b.board[9][7] = ' ';
+      b.board[9][9] = 'R';
+    } else if (b.CWQ && move.startsWith("9694")) {
+      b.board[9][5] = ' ';
+      b.board[9][2] = 'R';
+    } else if (b.CWK && move.startsWith("2628")) {
+      b.board[2][7] = ' ';
+      b.board[2][9] = 'r';
+    } else if (b.CWQ && move.startsWith("2624")) {
+      b.board[2][5] = ' ';
+      b.board[2][2] = 'r';
+    }
     // undo king location movement:
     if (b.board[from/10][from%10] == 'K') {
       b.kingLocs[0] = to/10;
@@ -116,11 +164,11 @@ public class Moves {
   }
   public static String availableMoves(Board b, boolean isWhite) {
     if (isInCheck(b.board, isWhite, b.kingLocs)) return availableMovesIIC(b, isWhite);
-    return availableMovesNC(b, isWhite);
+    return eliminateIllegalMoves(b, availableMovesNCDE(b, isWhite) + possibleCastle(b, isWhite), isWhite);
   }
   public static String availableMovesIIC(Board b, boolean isWhite) {
     // This method assumes the king is in check!!
-    String availableMoves = Moves.availableMovesNC(b, isWhite);
+    String availableMoves = eliminateIllegalMoves(b, availableMovesNCDE(b, isWhite), isWhite);
     String moves = "";
     for (int i = 0; i < availableMoves.length(); i+= 5) {
       Moves.makeMoveVerified(b, availableMoves.substring(i, i+5));
@@ -132,13 +180,10 @@ public class Moves {
     return availableMoves;
     //return eliminateIllegalMoves(b, moves, isWhite);
   }
-  public static String availableMovesNC(Board b, boolean isWhite) { // NC = No Check
-    return eliminateIllegalMoves(b, availableMovesNCDE(b, isWhite), isWhite);
-  }
-  public static String availableMovesNCDE(Board b, boolean isWhite) { // NC = No Check, DE = Don't eliminate, NC = No castle
+  public static String availableMovesNCDE(Board b, boolean isWhite) { // NC = No Check, DE = Don't eliminate
     // This method assumes the king is NOT in check!
     String moves = "";
-    // NOTE: We could make this more efficient by sorting the moves by probability of success
+    // NOTE: We could make this more efficient by sorting the moves by probability of success, in case a time limit is introduced
     if (isWhite) {
       for (int i = 2; i < 10; i++) {
         for (int j = 2; j < 10; j++) {
@@ -205,20 +250,22 @@ public class Moves {
     }
     return eliminated;
   }
-  /*public static String possibleCastle(Board b, boolean whiteToPlay) { //9698 9694 2628 2624
-    // BUG: THIS FUNCTION DOES NOT CHECK FOR CHECKS ON TRAVEL SQUARES!
-    if (isInCheck(b.board, whiteToPlay)) return ""; // can't castle out of check!
+  public static String possibleCastle(Board b, boolean whiteToPlay) { //9698 9694 2628 2624
+    if (isInCheck(b.board, whiteToPlay, b.kingLocs)) return ""; // can't castle out of check!
     String possibleCastle = "";
     if (whiteToPlay) {
-      if (b.CWK && b.board[9][7] == ' ' && b.board[9][8] == ' ') possibleCastle+= "9698 ";
-      if (b.CWQ && b.board[9][5] == ' ' && b.board[9][4] == ' ' || b.board[9][3] == ' ') possibleCastle+= "9694 ";
-
+      boolean kingsideSquaresChecked = isInCheck(b.board, true, new int[]{9, 7, 0, 0}) || isInCheck(b.board, true, new int[]{9, 8, 0, 0});
+      boolean queensideSquaresChecked = isInCheck(b.board, true, new int[]{9, 5, 0, 0}) || isInCheck(b.board, true, new int[]{9, 4, 0, 0}) || isInCheck(b.board, true, new int[]{9, 3, 0, 0});
+      if (b.CWK && b.board[9][7] == ' ' && b.board[9][8] == ' ' && !kingsideSquaresChecked) possibleCastle+= "9698 ";
+      if (b.CWQ && b.board[9][5] == ' ' && b.board[9][4] == ' ' && b.board[9][3] == ' ' && !queensideSquaresChecked) possibleCastle+= "9694 ";
     } else {
-      if (b.CBK && b.board[2][7] == ' ' && b.board[2][8] == ' ') possibleCastle+= "2628 ";
-      if (b.CBQ && b.board[2][5] == ' ' && b.board[2][4] == ' ' || b.board[2][3] == ' ') possibleCastle+= "2624 ";
+      boolean kingsideSquaresChecked = isInCheck(b.board, false, new int[]{0, 0, 2, 7}) || isInCheck(b.board, false, new int[]{0, 0, 2, 8});
+      boolean queensideSquaresChecked = isInCheck(b.board, false, new int[]{0, 0, 2, 5}) || isInCheck(b.board, false, new int[]{0, 0, 2, 4}) || isInCheck(b.board, false, new int[]{0, 0, 2, 3});
+      if (b.CBK && b.board[2][7] == ' ' && b.board[2][8] == ' ' && !kingsideSquaresChecked) possibleCastle+= "2628 ";
+      if (b.CBQ && b.board[2][5] == ' ' && b.board[2][4] == ' ' && b.board[2][3] == ' ' && !queensideSquaresChecked) possibleCastle+= "2624 ";
     }
     return possibleCastle;
-  } */
+  }
   public static String movesWP(Board b, int i, int j) {
     // moves for the white pawn
     String moves = "";
@@ -236,6 +283,7 @@ public class Moves {
     }
     if (i == 3 && b.board[2][j] == ' ') {
       moves+= "" + i + j + (i-1) + j + "Q";
+      //moves+= "" + i + j + (i-1) + j + "N";
     }
     return moves;
   }
@@ -256,6 +304,7 @@ public class Moves {
     }
     if (i == 9 && b.board[9][j] == ' ') {
       moves+= "" + i + j + (i+1) + j + "Q";
+      //moves+= "" + i + j + (i+1) + j + "N";
     }
     return moves;
   }
@@ -596,31 +645,6 @@ public class Moves {
     }
     return moves;
   }
-  /*public static boolean isInCheck(char[][] board, boolean white) {
-    int kingLocI = 2, kingLocJ = 2;
-    if (white) {
-      for (int i = 2; i < 10; i++) {
-        for (int j = 2; j < 10; j++) {
-          if (board[i][j] == 'K') {
-            kingLocI = i;
-            kingLocJ = j;
-            break;
-          }
-        }
-      }
-    } else {
-      for (int i = 2; i < 10; i++) {
-        for (int j = 2; j < 10; j++) {
-          if (board[i][j] == 'k') {
-            kingLocI = i;
-            kingLocJ = j;
-            break;
-          }
-        }
-      }
-    }
-    return isInCheck(board, white, kingLocI, kingLocJ);
-  } */
   public static boolean isInCheck(char[][] board, boolean white, int[] kingLocs) {
     // New, much more efficient method:
     if (white) {
@@ -755,39 +779,6 @@ public class Moves {
     }
     return false;
   }
-  /*public static boolean isInCheck(char[][] board, boolean white) {
-    // find the king:
-    String kingLoc = "22"; // 0, 0 in padded board notation
-    if (white) {
-      for (int i = 2; i < 10; i++) {
-        for (int j = 2; j < 10; j++) {
-          if (board[i][j] == 'K') {
-            kingLoc = "" + i + j;
-            break;
-          }
-        }
-      }
-      String availableMoves = availableMovesNCDE(new Board(board), false); // black's moves
-      for (int i = 0; i < availableMoves.length()-5; i+= 5) {
-        if (availableMoves.substring(i+2, i+4).equals(kingLoc)) return true;
-      }
-      return false;
-    } else {
-      for (int i = 2; i < 10; i++) {
-        for (int j = 2; j < 10; j++) {
-          if (board[i][j] == 'k') {
-            kingLoc = "" + i + j;
-            break;
-          }
-        }
-      }
-      String availableMoves = availableMovesNCDE(new Board(board), true); // white's moves
-      for (int i = 0; i < availableMoves.length()-5; i+= 5) {
-        if (availableMoves.substring(i+2, i+4).equals(kingLoc)) return true;
-      }
-      return false;
-    }
-  }*/
   public static boolean isAvailableForWhite(char x) {
     // helper function to determine wether white can move onto 'x':
     return (Character.isLowerCase(x) || x == ' ');
