@@ -62,11 +62,24 @@ public class Moves {
     if (b.CWQ && move.startsWith("92")) b.CWQ = false;
     if (b.CBK && move.startsWith("29")) b.CBK = false;
     if (b.CBQ && move.startsWith("22")) b.CBQ = false;
+    // In case of en passant, remove taken pawn:
+    if (Math.abs((to%10)-(from%10)) == 1 && Character.toUpperCase(b.board[from/10][from%10]) == 'P' && b.board[to/10][to%10] == ' ') {
+      if (to/10 == 4) {
+        b.board[5][b.possibleEP] = ' ';
+      } else if (to/10 == 7) {
+        b.board[6][b.possibleEP] = ' ';
+      }
+    }
+    // Update epRightsHistory:
+    b.epRightsHistory+= b.possibleEP;
+    // Add possible en passant in case of double pawn push:
+    b.possibleEP = (Math.abs(from-to) == 20 && Character.toUpperCase(b.board[from/10][from%10]) == 'P') ? from%10 : 0;
     // Make the move on the board:
     b.moveHistoryPiecesRemoved += b.board[to/10][to%10];
     b.board[to/10][to%10] = b.board[from/10][from%10];
     b.board[from/10][from%10] = ' ';
     if (move.charAt(4) != ' ') b.board[to/10][to%10] = move.charAt(4);
+    // take pawn out in case of en passant:
   }
   public static boolean makeMoveCastle(Board b, String move, boolean whiteToPlay) {
     // NOTE: We can explicitly define castling here to shave processing time a tiny bit.
@@ -149,6 +162,14 @@ public class Moves {
       b.board[2][5] = ' ';
       b.board[2][2] = 'r';
     }
+    // Update possibleEP and undo en passant history:
+    b.possibleEP = b.epRightsHistory.charAt(b.epRightsHistory.length()-1) - 48;
+    b.epRightsHistory = b.epRightsHistory.substring(0, b.epRightsHistory.length()-1);
+    // in case of en passant, return the taken pawn to its position:
+    if (b.possibleEP == from % 10 && Character.toUpperCase(b.board[from/10][from%10]) == 'P' && Math.abs((to%10)-(from%10)) == 1) { // achieves possibleEP != 0 (since it'll only be 0 if from = 100, which it can't)
+      if (to/10 == 5) b.board[5][b.possibleEP] = 'p'; // return black pawn
+      else if (to/10 == 6) b.board[6][b.possibleEP] = 'P'; // return white pawn
+    }
     // undo king location movement:
     if (b.board[from/10][from%10] == 'K') {
       b.kingLocs[0] = to/10;
@@ -182,6 +203,27 @@ public class Moves {
   public static String availableMovesNCDE(Board b, boolean isWhite) { // NC = No Check, DE = Don't eliminate
     // This method assumes the king is NOT in check!
     String moves = "";
+    // check for possible en passant:
+    switch (b.possibleEP) {
+      case 0: break;
+      case 2:
+        if (b.board[5][3] == 'P' && isWhite) moves+= "5324 ";
+        else if (b.board[6][3] == 'p' && !isWhite) moves+= "6372 ";
+        break;
+      case 9:
+        if (b.board[5][8] == 'P' && isWhite) moves+= "5849 ";
+        else if (b.board[6][8] == 'p' && isWhite) moves+= "6879 ";
+        break;
+      default:
+        if (isWhite) {
+          if (b.board[5][b.possibleEP+1] == 'P') moves+= "5" + (b.possibleEP+1) + "4" + (b.possibleEP) + " ";
+          if (b.board[5][b.possibleEP-1] == 'P') moves+= "5" + (b.possibleEP-1) + "4" + (b.possibleEP) + " ";
+        } else {
+          if (b.board[6][b.possibleEP+1] == 'p') moves+= "6" + (b.possibleEP+1) + "7" + (b.possibleEP) + " ";
+          if (b.board[6][b.possibleEP-1] == 'p') moves+= "6" + (b.possibleEP-1) + "7" + (b.possibleEP) + " ";
+        }
+        break;
+    }
     // NOTE: We could make this more efficient by sorting the moves by probability of success, in case a time limit is introduced
     if (isWhite) {
       for (int i = 2; i < 10; i++) {

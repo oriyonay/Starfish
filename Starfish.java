@@ -8,22 +8,24 @@ public class Starfish {
   public static void main(String[] args) {
     // main:
     //playAgainstYourself();
-    Utils.printLogo();
-    Utils.printHelpMenu();
-    playStarfish();
+    //Utils.printLogo();
+    //Utils.printHelpMenu();
+    //UCI.uciCommunication();
+    //playStarfish();
+
     /*long startTime = System.nanoTime();
     Evaluation.getBestMove(b, 3, -Constants.INF, Constants.INF, false);
     long endTime = System.nanoTime();
     System.out.println("Execution took " + (endTime - startTime)/1000000 + "ms"); */
     //playTwoPlayerChess();
-
+    Board b = new Board();
     // Perft testing:
-    /*long startTime = System.nanoTime();
-    int p = Perft.perft(b, true, 4);
+    long startTime = System.nanoTime();
+    int p = Perft.perft(b, true, 3);
     System.out.println(p);
     long endTime = System.nanoTime();
     System.out.println("Took " + (endTime - startTime)/1000000 + "ms to compute " + p + " positions.");
-    */
+
   }
   public static void playTwoPlayerChess() {
     System.out.println("Welcome to Starfish's two-player chess interface!");
@@ -61,17 +63,6 @@ public class Starfish {
     while (!Evaluation.isGameOver(b, whiteTurn)) {
       if (whiteTurn) {
         System.out.print("\nWhite's turn: ");
-        /* CASTLING STUFF
-        if (Moves.possibleCastle(b, whiteTurn).length() > 0) {
-          System.out.println("Possible castling options: " + Moves.possibleCastle(b, whiteTurn));
-        } else {
-          System.out.println("\tCannot castle right now. DEBUG: ");
-          System.out.println("\tCWK = " + b.CWK);
-          System.out.println("\tCWQ = " + b.CWQ);
-          System.out.println("\tCBK = " + b.CBK);
-          System.out.println("\tCBQ = " + b.CBQ);
-          System.out.println();
-        }*/
         userMove = in.nextLine();
         if (userMove.equalsIgnoreCase("exit")) return;
         if (userMove.startsWith("help")) {

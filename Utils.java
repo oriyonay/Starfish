@@ -20,7 +20,7 @@ public class Utils {
     System.out.println("/\\__/ / | || | | || |\\ \\| |    _| |_/\\__/ / | | |");
     System.out.println("\\____/  \\_/\\_| |_/\\_| \\_\\_|    \\___/\\____/\\_| |_/");
     System.out.println();
-    System.out.println("Version 0.3, written by Ori Yonay\n");
+    System.out.println("Version 0.4, written by Ori Yonay\n");
   }
   public static void printHelpMenu() {
     System.out.println("Help: use 'exit' or 'resign' to quit.");
