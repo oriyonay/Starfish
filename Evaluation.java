@@ -272,4 +272,8 @@ static int king_end_game[] =
       return value;
     }
   }
+  public static String getRandomMove(Board b, boolean isWhite) {
+    String moves[] = Moves.availableMoves(b, isWhite).split(" ");
+    return moves[10]; //[(int)(Math.random() * moves.length)];
+  }
 }

@@ -4,18 +4,18 @@ public class Moves {
   public static String moveToAlgebra(String move) {
     String moveString = (char)(move.charAt(1) + 15) + "" + (58 - move.charAt(0));
     moveString += (char)(move.charAt(3) + 15) + "" + (58 - move.charAt(2));
-    return moveString;
+    return moveString + (move.length() == 4 ? ' ' : move.charAt(4));
   }
   public static String algebraToMove(String algebra) {
     algebra = algebra.toUpperCase();
     String moveString = (58 - algebra.charAt(1)) + "" + (algebra.charAt(0) -  63);
     moveString+= (58 - algebra.charAt(3)) + "" + (algebra.charAt(2) -  63);
-    return moveString;
+    return moveString + (algebra.length() == 4 ? ' ' : algebra.charAt(4));
   }
   public static boolean makeMove(Board b, String move, boolean whiteToPlay) {
     // Does not assume validity of input!
     boolean valid = false;
-    if (move.length() == 4) move += " ";
+    //if (move.length() == 4) move += " ";
     String availableMoves = (whiteToPlay) ? availableMoves(b, true) : availableMoves(b, false);
     for (int i = 0; i < availableMoves.length(); i+= 5) {
       if (move.equals(availableMoves.substring(i, i+5))) {
@@ -57,11 +57,11 @@ public class Moves {
       b.CBK = false;
       b.CBQ = false;
     }
-    // Check for first-time rook movement:
-    if (b.CWK && move.startsWith("99")) b.CWK = false;
-    if (b.CWQ && move.startsWith("92")) b.CWQ = false;
-    if (b.CBK && move.startsWith("29")) b.CBK = false;
-    if (b.CBQ && move.startsWith("22")) b.CBQ = false;
+    // Check for first-time rook (corner) movement or capture before first-time rook movement:
+    if (move.startsWith("99") || move.endsWith("99 ")) b.CWK = false;
+    if (move.startsWith("92") || move.endsWith("92 ")) b.CWQ = false;
+    if (move.startsWith("29") || move.endsWith("29 ")) b.CBK = false;
+    if (move.startsWith("22") || move.endsWith("22 ")) b.CBQ = false;
     // In case of en passant, remove taken pawn:
     if (Math.abs((to%10)-(from%10)) == 1 && Character.toUpperCase(b.board[from/10][from%10]) == 'P' && b.board[to/10][to%10] == ' ') {
       if (to/10 == 4) {
@@ -79,7 +79,8 @@ public class Moves {
     b.board[to/10][to%10] = b.board[from/10][from%10];
     b.board[from/10][from%10] = ' ';
     if (move.charAt(4) != ' ') b.board[to/10][to%10] = move.charAt(4);
-    // take pawn out in case of en passant:
+    // TODO: take pawn out in case of en passant:
+
   }
   public static boolean makeMoveCastle(Board b, String move, boolean whiteToPlay) {
     // NOTE: We can explicitly define castling here to shave processing time a tiny bit.
@@ -116,8 +117,8 @@ public class Moves {
         // then Black kingside castle is legal and we perform it:
         b.board[2][6] = ' ';
         b.board[2][9] = ' ';
-        b.board[2][8] = 'K';
-        b.board[2][7] = 'R';
+        b.board[2][8] = 'k';
+        b.board[2][7] = 'r';
         b.CBK = false;
         b.CBQ = false;
         return true;
@@ -128,8 +129,8 @@ public class Moves {
         b.board[2][6] = ' ';
         b.board[2][2] = ' ';
         // b.board[2][3] is ' ', otherwise the function would have returned false, so no need doing anything
-        b.board[2][4] = 'K';
-        b.board[2][5] = 'R';
+        b.board[2][4] = 'k';
+        b.board[2][5] = 'r';
         b.CBK = false;
         b.CBQ = false;
         return true;
@@ -142,34 +143,35 @@ public class Moves {
     int to = Integer.parseInt(move.substring(0, 2));
     int from = Integer.parseInt(move.substring(2, 4));
     // Undo castle rights history:
-    b.CWK = b.castleRightsHistory[0].endsWith("Y") ? true : false;
-    b.CWQ = b.castleRightsHistory[1].endsWith("Y") ? true : false;
-    b.CBK = b.castleRightsHistory[2].endsWith("Y") ? true : false;
-    b.CBQ = b.castleRightsHistory[3].endsWith("Y") ? true : false;
+    b.CWK = b.castleRightsHistory[0].endsWith("Y");
+    b.CWQ = b.castleRightsHistory[1].endsWith("Y");
+    b.CBK = b.castleRightsHistory[2].endsWith("Y");
+    b.CBQ = b.castleRightsHistory[3].endsWith("Y");
     for (int i = 0; i < 4; i++) {
       b.castleRightsHistory[i] = b.castleRightsHistory[i].substring(0, b.castleRightsHistory[i].length()-1);
     }
-    if (b.CWK && move.startsWith("9698")) { // if the last move was a castle, we have to move the rook back
+    if (b.CWK && move.equals("9698 ")) { // if the last move was a castle, we have to move the rook back
       b.board[9][7] = ' ';
       b.board[9][9] = 'R';
-    } else if (b.CWQ && move.startsWith("9694")) {
+    } else if (b.CWQ && move.equals("9694 ")) {
       b.board[9][5] = ' ';
       b.board[9][2] = 'R';
-    } else if (b.CWK && move.startsWith("2628")) {
+    } else if (b.CWK && move.equals("2628 ")) {
       b.board[2][7] = ' ';
       b.board[2][9] = 'r';
-    } else if (b.CWQ && move.startsWith("2624")) {
+    } else if (b.CWQ && move.equals("2624 ")) {
       b.board[2][5] = ' ';
       b.board[2][2] = 'r';
     }
     // Update possibleEP and undo en passant history:
     b.possibleEP = b.epRightsHistory.charAt(b.epRightsHistory.length()-1) - 48;
     b.epRightsHistory = b.epRightsHistory.substring(0, b.epRightsHistory.length()-1);
-    // in case of en passant, return the taken pawn to its position:
-    if (b.possibleEP == from % 10 && Character.toUpperCase(b.board[from/10][from%10]) == 'P' && Math.abs((to%10)-(from%10)) == 1) { // achieves possibleEP != 0 (since it'll only be 0 if from = 100, which it can't)
+    // in case of en passant, return the taken pawn to its original position:
+    /*if ((to%10 != from % 10) && Character.toUpperCase(b.board[from/10][from%10]) == 'P' && b.board[to/10][to%10] == ' ') {
+      System.out.println("Last move was en passant from " + from + " to " + to);
       if (to/10 == 5) b.board[5][b.possibleEP] = 'p'; // return black pawn
       else if (to/10 == 6) b.board[6][b.possibleEP] = 'P'; // return white pawn
-    }
+    }*/
     // undo king location movement:
     if (b.board[from/10][from%10] == 'K') {
       b.kingLocs[0] = to/10;
@@ -204,7 +206,7 @@ public class Moves {
     // This method assumes the king is NOT in check!
     String moves = "";
     // check for possible en passant:
-    switch (b.possibleEP) {
+    /*switch (b.possibleEP) {
       case 0: break;
       case 2:
         if (b.board[5][3] == 'P' && isWhite) moves+= "5324 ";
@@ -223,7 +225,7 @@ public class Moves {
           if (b.board[6][b.possibleEP-1] == 'p') moves+= "6" + (b.possibleEP-1) + "7" + (b.possibleEP) + " ";
         }
         break;
-    }
+    }*/
     // NOTE: We could make this more efficient by sorting the moves by probability of success, in case a time limit is introduced
     if (isWhite) {
       for (int i = 2; i < 10; i++) {
@@ -293,6 +295,7 @@ public class Moves {
   }
   public static String possibleCastle(Board b, boolean whiteToPlay) { //9698 9694 2628 2624
     if (isInCheck(b.board, whiteToPlay, b.kingLocs)) return ""; // can't castle out of check!
+    // TODO: By the way, that ^^ line may not be necessary as AvailableMovesIIC checks for this anyway. Will have to double-check in the future though.
     String possibleCastle = "";
     if (whiteToPlay) {
       boolean kingsideSquaresChecked = isInCheck(b.board, true, new int[]{9, 7, 0, 0}) || isInCheck(b.board, true, new int[]{9, 8, 0, 0});

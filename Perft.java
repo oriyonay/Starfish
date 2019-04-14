@@ -1,10 +1,15 @@
+// NOTE: THIS HAS NOT BEEN WORKING SINCE MOVING FROM CHAR[][] REPRESENTATION TO
+// BOARD CLASS REPRESENTATION!
+
 package starfish;
 
 public class Perft {
   public static int perft(Board b, boolean whiteToPlay, int depth) {
     //char[][] b1 = board.clone();
     String availableMoves = Moves.availableMoves(b, whiteToPlay);
-    if (depth == 1) return availableMoves.length() / 5;
+    if (depth == 0) b.printBoard();
+    //if (depth == 1) return availableMoves.length() / 5;
+    // more 'correct' way would be if (depth == 0) return 1
     int sumMoves = 0;
     for (int i = 0; i < availableMoves.length(); i+= 5) {
       try {

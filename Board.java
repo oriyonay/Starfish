@@ -6,7 +6,7 @@ public class Board {
   public static String moveHistoryPiecesRemoved = " ";
   public static String[] castleRightsHistory = {"Y", "Y", "Y", "Y"};
   public static int[] kingLocs = {9, 6, 2, 6};
-  public static int possibleEP = 0; // -1 = no en passant possible, anything else = the column where EP could happen
+  public static int possibleEP = 0; // 0 = no en passant possible, anything else = the column where EP could happen
   public static String epRightsHistory = "0";
   public static boolean CWK = true, CWQ = true, CBK = true, CBQ = true; // castle rights
   public Board() {

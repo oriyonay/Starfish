@@ -8,9 +8,10 @@ public class Starfish {
   public static void main(String[] args) {
     // main:
     //playAgainstYourself();
-    //Utils.printLogo();
-    //Utils.printHelpMenu();
+    Utils.printLogo();
+    Utils.printHelpMenu();
     //UCI.uciCommunication();
+    playAgainstYourself();
     //playStarfish();
 
     /*long startTime = System.nanoTime();
@@ -18,14 +19,14 @@ public class Starfish {
     long endTime = System.nanoTime();
     System.out.println("Execution took " + (endTime - startTime)/1000000 + "ms"); */
     //playTwoPlayerChess();
-    Board b = new Board();
     // Perft testing:
+    /*Board b = new Board();
     long startTime = System.nanoTime();
     int p = Perft.perft(b, true, 3);
     System.out.println(p);
     long endTime = System.nanoTime();
     System.out.println("Took " + (endTime - startTime)/1000000 + "ms to compute " + p + " positions.");
-
+    */
   }
   public static void playTwoPlayerChess() {
     System.out.println("Welcome to Starfish's two-player chess interface!");
@@ -108,7 +109,7 @@ public class Starfish {
         System.out.print("\nStarfish's turn: ");
         // IDEA: Perhaps add a feature where Starfish could decide to resign if static eval < SOME_NUMBER?
         long startTime = System.nanoTime();
-        computerMove = Evaluation.getBestMove(b, 2, -Constants.INF, Constants.INF, false);
+        computerMove = Evaluation.getBestMove(b, 3, -Constants.INF, Constants.INF, false);
         Moves.makeMove(b, computerMove, whiteTurn);
         // add Starfish's move to the move history
         moveHistory.add(computerMove);
@@ -132,7 +133,7 @@ public class Starfish {
       if (whiteTurn) {
         System.out.println("White's turn:");
         long startTime = System.nanoTime();
-        computerMove = Evaluation.getBestMove(b, 5, -Constants.INF, Constants.INF, true);
+        computerMove = Evaluation.getBestMove(b, 3, -Constants.INF, Constants.INF, true);
         long endTime = System.nanoTime();
         Moves.makeMove(b, computerMove, whiteTurn);
         System.out.println("Calculation took " + (endTime - startTime)/1000000 + "ms\n");
@@ -140,7 +141,7 @@ public class Starfish {
       } else {
         System.out.print("Black's turn: ");
         long startTime = System.nanoTime();
-        computerMove = Evaluation.getBestMove(b, 5, -Constants.INF, Constants.INF, false);
+        computerMove = Evaluation.getBestMove(b, 3, -Constants.INF, Constants.INF, false);
         Moves.makeMove(b, computerMove, whiteTurn);
         long endTime = System.nanoTime();
         System.out.println("Calculation took " + (endTime - startTime)/1000000 + "ms\n");
