@@ -7,9 +7,10 @@ A simple chess engine that implements alpha-beta pruning in Java. It's not very 
  - Undo moves
  - Import / export FEN
  - Material & position evaluation
- - Castling
+ - Castling & En Passant
+ - Promotion (to queen, for now)
 
 ## TODO:
- - Implement en passant (future)
+ - Implement knight promotion?
  - Get game state (opening, middlegame, or endgame) and play accordingly
  - Implement UCI protocol
