@@ -14,16 +14,8 @@ public class Moves {
   }
   public static boolean makeMove(Board b, String move, boolean whiteToPlay) {
     // Does not assume validity of input!
-    boolean valid = false;
-    //if (move.length() == 4) move += " ";
     String availableMoves = (whiteToPlay) ? availableMoves(b, true) : availableMoves(b, false);
-    for (int i = 0; i < availableMoves.length(); i+= 5) {
-      if (move.equals(availableMoves.substring(i, i+5))) {
-        valid = true;
-        break;
-      }
-    }
-    if (!valid) {
+    if (availableMoves.indexOf(move) < 0) {
       System.out.println("Error: illegal move! " + moveToAlgebra(move));
       b.printBoard();
       System.out.println("White's turn: ");
@@ -79,8 +71,6 @@ public class Moves {
     b.board[to/10][to%10] = b.board[from/10][from%10];
     b.board[from/10][from%10] = ' ';
     if (move.charAt(4) != ' ') b.board[to/10][to%10] = move.charAt(4);
-    // TODO: take pawn out in case of en passant:
-
   }
   public static boolean makeMoveCastle(Board b, String move, boolean whiteToPlay) {
     // NOTE: We can explicitly define castling here to shave processing time a tiny bit.
@@ -167,11 +157,10 @@ public class Moves {
     b.possibleEP = b.epRightsHistory.charAt(b.epRightsHistory.length()-1) - 48;
     b.epRightsHistory = b.epRightsHistory.substring(0, b.epRightsHistory.length()-1);
     // in case of en passant, return the taken pawn to its original position:
-    /*if ((to%10 != from % 10) && Character.toUpperCase(b.board[from/10][from%10]) == 'P' && b.board[to/10][to%10] == ' ') {
-      System.out.println("Last move was en passant from " + from + " to " + to);
+    if ((to%10 != from % 10) && Character.toUpperCase(b.board[from/10][from%10]) == 'P' && b.board[to/10][to%10] == ' ') {
       if (to/10 == 5) b.board[5][b.possibleEP] = 'p'; // return black pawn
       else if (to/10 == 6) b.board[6][b.possibleEP] = 'P'; // return white pawn
-    }*/
+    }
     // undo king location movement:
     if (b.board[from/10][from%10] == 'K') {
       b.kingLocs[0] = to/10;
@@ -206,10 +195,10 @@ public class Moves {
     // This method assumes the king is NOT in check!
     String moves = "";
     // check for possible en passant:
-    /*switch (b.possibleEP) {
+    switch (b.possibleEP) {
       case 0: break;
       case 2:
-        if (b.board[5][3] == 'P' && isWhite) moves+= "5324 ";
+        if (b.board[5][3] == 'P' && isWhite) moves+= "5342 ";
         else if (b.board[6][3] == 'p' && !isWhite) moves+= "6372 ";
         break;
       case 9:
@@ -225,7 +214,7 @@ public class Moves {
           if (b.board[6][b.possibleEP-1] == 'p') moves+= "6" + (b.possibleEP-1) + "7" + (b.possibleEP) + " ";
         }
         break;
-    }*/
+    }
     // NOTE: We could make this more efficient by sorting the moves by probability of success, in case a time limit is introduced
     if (isWhite) {
       for (int i = 2; i < 10; i++) {

@@ -263,7 +263,7 @@ static int king_end_game[] =
           bestMoveIndex = i;
         }
         if (value < beta) beta = value;
-        if (alpha >= beta) break; // beta cut-off
+        if (alpha >= beta) break; // alpha cut-off
       }
       try {
         bestMove = moves.substring(bestMoveIndex, bestMoveIndex+5);
@@ -274,6 +274,6 @@ static int king_end_game[] =
   }
   public static String getRandomMove(Board b, boolean isWhite) {
     String moves[] = Moves.availableMoves(b, isWhite).split(" ");
-    return moves[10]; //[(int)(Math.random() * moves.length)];
+    return moves[17] + " "; //[(int)(Math.random() * moves.length)];
   }
 }

@@ -7,11 +7,10 @@ public class Starfish {
   public static boolean whiteToPlay = true;
   public static void main(String[] args) {
     // main:
-    //playAgainstYourself();
-    Utils.printLogo();
-    Utils.printHelpMenu();
+    //Utils.printLogo();
+    //Utils.printHelpMenu();
     //UCI.uciCommunication();
-    playAgainstYourself();
+    //playAgainstYourself();
     //playStarfish();
 
     /*long startTime = System.nanoTime();
@@ -20,13 +19,13 @@ public class Starfish {
     System.out.println("Execution took " + (endTime - startTime)/1000000 + "ms"); */
     //playTwoPlayerChess();
     // Perft testing:
-    /*Board b = new Board();
+    Board b = new Board();
     long startTime = System.nanoTime();
     int p = Perft.perft(b, true, 3);
-    System.out.println(p);
     long endTime = System.nanoTime();
+    System.out.println(p);
     System.out.println("Took " + (endTime - startTime)/1000000 + "ms to compute " + p + " positions.");
-    */
+
   }
   public static void playTwoPlayerChess() {
     System.out.println("Welcome to Starfish's two-player chess interface!");
@@ -109,7 +108,7 @@ public class Starfish {
         System.out.print("\nStarfish's turn: ");
         // IDEA: Perhaps add a feature where Starfish could decide to resign if static eval < SOME_NUMBER?
         long startTime = System.nanoTime();
-        computerMove = Evaluation.getBestMove(b, 3, -Constants.INF, Constants.INF, false);
+        computerMove = Evaluation.getRandomMove(b, false); //Evaluation.getBestMove(b, 2, -Constants.INF, Constants.INF, false);
         Moves.makeMove(b, computerMove, whiteTurn);
         // add Starfish's move to the move history
         moveHistory.add(computerMove);
