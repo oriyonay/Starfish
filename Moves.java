@@ -55,13 +55,15 @@ public class Moves {
     if (move.startsWith("29") || move.endsWith("29 ")) b.CBK = false;
     if (move.startsWith("22") || move.endsWith("22 ")) b.CBQ = false;
     // In case of en passant, remove taken pawn:
-    if (Math.abs((to%10)-(from%10)) == 1 && Character.toUpperCase(b.board[from/10][from%10]) == 'P' && b.board[to/10][to%10] == ' ') {
+    /*if (Math.abs((to%10)-(from%10)) == 1 && Character.toUpperCase(b.board[from/10][from%10]) == 'P' && b.board[to/10][to%10] == ' ') {
+      System.out.println("DEBUG: En passant performed");
       if (to/10 == 4) {
         b.board[5][b.possibleEP] = ' ';
       } else if (to/10 == 7) {
         b.board[6][b.possibleEP] = ' ';
       }
-    }
+      b.printBoard();
+    }*/
     // Update epRightsHistory:
     b.epRightsHistory+= b.possibleEP;
     // Add possible en passant in case of double pawn push:
@@ -154,13 +156,14 @@ public class Moves {
       b.board[2][2] = 'r';
     }
     // Update possibleEP and undo en passant history:
-    b.possibleEP = b.epRightsHistory.charAt(b.epRightsHistory.length()-1) - 48;
+    b.possibleEP = b.epRightsHistory.charAt(b.epRightsHistory.length()-1) - 48; // -48 converts it to its respective character
     b.epRightsHistory = b.epRightsHistory.substring(0, b.epRightsHistory.length()-1);
     // in case of en passant, return the taken pawn to its original position:
-    if ((to%10 != from % 10) && Character.toUpperCase(b.board[from/10][from%10]) == 'P' && b.board[to/10][to%10] == ' ') {
+    /*if (b.possibleEP == from && Math.abs((to%10)-(from%10)) == 1 && Character.toUpperCase(b.board[from/10][from%10]) == 'P') {
+      System.out.println("DEBUG: En passant undone, move " + move);
       if (to/10 == 5) b.board[5][b.possibleEP] = 'p'; // return black pawn
       else if (to/10 == 6) b.board[6][b.possibleEP] = 'P'; // return white pawn
-    }
+    }*/
     // undo king location movement:
     if (b.board[from/10][from%10] == 'K') {
       b.kingLocs[0] = to/10;
@@ -195,7 +198,7 @@ public class Moves {
     // This method assumes the king is NOT in check!
     String moves = "";
     // check for possible en passant:
-    switch (b.possibleEP) {
+    /*switch (b.possibleEP) {
       case 0: break;
       case 2:
         if (b.board[5][3] == 'P' && isWhite) moves+= "5342 ";
@@ -214,7 +217,7 @@ public class Moves {
           if (b.board[6][b.possibleEP-1] == 'p') moves+= "6" + (b.possibleEP-1) + "7" + (b.possibleEP) + " ";
         }
         break;
-    }
+    }*/
     // NOTE: We could make this more efficient by sorting the moves by probability of success, in case a time limit is introduced
     if (isWhite) {
       for (int i = 2; i < 10; i++) {

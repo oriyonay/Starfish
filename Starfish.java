@@ -5,13 +5,18 @@ import java.util.ArrayList;
 
 public class Starfish {
   public static boolean whiteToPlay = true;
+  public static int numMovesAhead = 4;
   public static void main(String[] args) {
+    Scanner in = new Scanner(System.in);
     // main:
-    //Utils.printLogo();
-    //Utils.printHelpMenu();
+    Utils.printLogo();
+    Utils.printHelpMenu();
     //UCI.uciCommunication();
-    //playAgainstYourself();
-    //playStarfish();
+    System.out.println("How many moves ahead should Starfish look?");
+    do {
+      numMovesAhead = in.nextInt();
+    } while (numMovesAhead <= 0);
+    playStarfish();
 
     /*long startTime = System.nanoTime();
     Evaluation.getBestMove(b, 3, -Constants.INF, Constants.INF, false);
@@ -19,13 +24,13 @@ public class Starfish {
     System.out.println("Execution took " + (endTime - startTime)/1000000 + "ms"); */
     //playTwoPlayerChess();
     // Perft testing:
-    Board b = new Board();
+    /*Board b = new Board();
     long startTime = System.nanoTime();
-    int p = Perft.perft(b, true, 3);
+    int p = Perft.perft(b, true, 5);
     long endTime = System.nanoTime();
     System.out.println(p);
     System.out.println("Took " + (endTime - startTime)/1000000 + "ms to compute " + p + " positions.");
-
+    */
   }
   public static void playTwoPlayerChess() {
     System.out.println("Welcome to Starfish's two-player chess interface!");
@@ -108,7 +113,7 @@ public class Starfish {
         System.out.print("\nStarfish's turn: ");
         // IDEA: Perhaps add a feature where Starfish could decide to resign if static eval < SOME_NUMBER?
         long startTime = System.nanoTime();
-        computerMove = Evaluation.getRandomMove(b, false); //Evaluation.getBestMove(b, 2, -Constants.INF, Constants.INF, false);
+        computerMove = Evaluation.getBestMove(b, numMovesAhead, -Constants.INF, Constants.INF, whiteTurn);
         Moves.makeMove(b, computerMove, whiteTurn);
         // add Starfish's move to the move history
         moveHistory.add(computerMove);
@@ -120,38 +125,4 @@ public class Starfish {
       b.printBoard();
     }
   }
-
-
-
-  public static void playAgainstYourself() {
-    Board b = new Board();
-    boolean whiteTurn = b.whiteTurn; // could just be set to true, but could be useful later
-    b.printBoard();
-    String computerMove = "";
-    while (!Evaluation.isGameOver(b, whiteTurn)) {
-      if (whiteTurn) {
-        System.out.println("White's turn:");
-        long startTime = System.nanoTime();
-        computerMove = Evaluation.getBestMove(b, 3, -Constants.INF, Constants.INF, true);
-        long endTime = System.nanoTime();
-        Moves.makeMove(b, computerMove, whiteTurn);
-        System.out.println("Calculation took " + (endTime - startTime)/1000000 + "ms\n");
-
-      } else {
-        System.out.print("Black's turn: ");
-        long startTime = System.nanoTime();
-        computerMove = Evaluation.getBestMove(b, 3, -Constants.INF, Constants.INF, false);
-        Moves.makeMove(b, computerMove, whiteTurn);
-        long endTime = System.nanoTime();
-        System.out.println("Calculation took " + (endTime - startTime)/1000000 + "ms\n");
-        //b.printBoard();
-      }
-      whiteTurn = !whiteTurn;
-      b.printBoard();
-    }
-  }
-
-
-
-
 }
