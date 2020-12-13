@@ -1,5 +1,7 @@
 # Starfish
 
+**NOTE: I MADE THIS YEARS AGO! IT'S NOT VERY EFFICIENT!**
+
 A simple chess engine that implements alpha-beta pruning in Java. It's not very efficient but it can play decent chess :)
 
 Download [Starfish.jar](https://github.com/oriyonay/Starfish/raw/master/Starfish.jar) :)
